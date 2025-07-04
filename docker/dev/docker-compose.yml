@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: shiori-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: shiori
+    ports:
+      - "33306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - shiori-net
+
+volumes:
+  mysql_data:
+
+networks:
+  kokoro-net:
+    driver: bridge
