@@ -5,7 +5,7 @@ from typing import Optional
 
 @dataclass
 class User:
-    id: int
+    id: Optional[int]
     email: str
     password: str
     nickname: Optional[str]
