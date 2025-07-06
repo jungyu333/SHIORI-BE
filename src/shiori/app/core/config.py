@@ -16,10 +16,10 @@ class BaseConfig(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8080
     WRITER_DB_URL: str = (
-        "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori?timezone=UTC"
+        "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori"
     )
     READER_DB_URL: str = (
-        "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori?timezone=UTC"
+        "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori"
     )
     JWT_SECRET_KEY: str = "shiori"
     JWT_ALGORITHM: str = "HS256"

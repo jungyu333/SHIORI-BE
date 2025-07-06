@@ -5,6 +5,8 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import create_engine, pool
 
+import database_models
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
 
@@ -25,9 +27,9 @@ if config.config_file_name is not None:
 from src.shiori.app.core.config import get_settings
 from src.shiori.app.core.database import Base
 
+setting = get_settings()
 target_metadata = Base.metadata
 
-setting = get_settings()
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
