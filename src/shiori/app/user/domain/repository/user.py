@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ..entity.user import User as UserVO
+from shiori.app.user.domain.entity.user import User as UserVO
 
 
 class UserRepository(ABC):

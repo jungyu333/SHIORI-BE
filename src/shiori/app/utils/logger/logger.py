@@ -1,8 +1,9 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
-from ..log_utils import get_today_log_file_path, passes_log_level_filter
-from .formatter import ColorFormatter, JsonFormatter
+from shiori.app.utils.log_utils import (get_today_log_file_path,
+                                        passes_log_level_filter)
+from shiori.app.utils.logger.formatter import ColorFormatter, JsonFormatter
 
 
 class Logger:
