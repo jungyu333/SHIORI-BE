@@ -1,12 +1,24 @@
 import re
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, field_validator
 
 
 class SignUpRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
+    @field_validator("email")
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+
+        email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
+        if not email_regex.match(v):
+            raise ValueError("이메일 주소 형식이 올바르지 않습니다.")
+
+        return v
+
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
         v = v.strip()
