@@ -1,3 +1,7 @@
+.PHONY: alembic-revision alembic-upgrade run-rollback
+
+MESSAGE ?= "Default migration message"
+
 run-dev:
 	python src/shiori/main.py --env dev --debug
 
@@ -9,3 +13,12 @@ start-dev-db:
 
 stop-dev-db:
 	docker stop shiori-mysql
+
+run-migration:
+	alembic upgrade head
+
+run-rollback:
+	alembic downgrade -1
+
+run-revision:
+	alembic revision --autogenerate -m "$(MESSAGE)"
