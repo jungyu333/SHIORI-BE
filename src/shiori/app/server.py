@@ -6,11 +6,8 @@ from fastapi.responses import JSONResponse
 
 from .container import Container
 from .core.exceptions import BaseCustomException
-from .core.middleware import (
-    RequestLogMiddleware,
-    ResponseLogMiddleware,
-    SQLAlchemyMiddleware,
-)
+from .core.middleware import (RequestLogMiddleware, ResponseLogMiddleware,
+                              SQLAlchemyMiddleware)
 
 
 def init_router(app_: FastAPI) -> None:
@@ -48,8 +45,8 @@ def make_middleware() -> list[Middleware]:
 
 def create_app() -> FastAPI:
     app_ = FastAPI(
-        title="Kokoro Be",
-        description="Kokoro Be",
+        title="Shiori Be",
+        description="Shiori Be",
         version="1.0.0",
         middleware=make_middleware(),
     )
