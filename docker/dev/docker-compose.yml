@@ -19,5 +19,5 @@ volumes:
   mysql_data:
 
 networks:
-  kokoro-net:
+  shiori-net:
     driver: bridge
