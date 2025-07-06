@@ -1,5 +1,5 @@
 from .base import (BaseCustomException, ForbiddenException, NotFoundException,
-                   ServerErrorException)
+                   ServerErrorException, ValidationException)
 
 __all__ = [
     "BaseCustomException",

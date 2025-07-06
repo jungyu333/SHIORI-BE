@@ -6,7 +6,7 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
 from .container import Container
-from .core.exceptions import BaseCustomException
+from .core.exceptions import BaseCustomException, ValidationException
 from .core.middleware import (RequestLogMiddleware, ResponseLogMiddleware,
                               SQLAlchemyMiddleware)
 from .user.interface.router import user_router
@@ -26,7 +26,6 @@ def init_listener(app_: FastAPI) -> None:
         errors = exc.errors()
 
         def clean_msg(msg: str) -> str:
-
             if msg.lower().startswith("value error, "):
                 return msg[13:].strip()
             return msg
@@ -35,16 +34,9 @@ def init_listener(app_: FastAPI) -> None:
             clean_msg(errors[0]["msg"]) if errors else "요청값이 올바르지 않습니다"
         )
 
-        custom_exception = BaseCustomException(code=422, message=first_msg, data=None)
+        validation_exc = ValidationException(message=first_msg, data=None)
 
-        return JSONResponse(
-            status_code=422,
-            content={
-                "code": custom_exception.code,
-                "message": custom_exception.message,
-                "data": None,
-            },
-        )
+        return await custom_exception_handler(request, validation_exc)
 
     @app_.exception_handler(BaseCustomException)
     async def custom_exception_handler(request: Request, exc: BaseCustomException):

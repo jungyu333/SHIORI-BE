@@ -21,3 +21,8 @@ class ForbiddenException(BaseCustomException):
 class ServerErrorException(BaseCustomException):
     def __init__(self, message: str = "Internal Server Error", data: None = None):
         super().__init__(code=500, message=message, data=data)
+
+
+class ValidationException(BaseCustomException):
+    def __init__(self, message: str = "요청값이 올바르지 않습니다", data=None):
+        super().__init__(code=422, message=message, data=data)
