@@ -1,12 +1,12 @@
 import re
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class SignUpRequest(BaseModel):
-    email: str
-    password: str
-    nickname: str
+    email: str = Field(..., examples=["jungyu3826@gmail.com"])
+    password: str = Field(..., examples=["rlawnsrb1!"])
+    nickname: str = Field(..., examples=["jungyu"])
 
     @field_validator("email")
     @classmethod
