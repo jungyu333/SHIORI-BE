@@ -6,6 +6,7 @@ from pydantic import BaseModel, field_validator
 class SignUpRequest(BaseModel):
     email: str
     password: str
+    nickname: str
 
     @field_validator("email")
     @classmethod
@@ -14,7 +15,7 @@ class SignUpRequest(BaseModel):
         email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
         if not email_regex.match(v):
-            raise ValueError("이메일 주소 형식이 올바르지 않습니다.")
+            raise ValueError("이메일 주소 형식이 올바르지 않습니다")
 
         return v
 
@@ -23,11 +24,11 @@ class SignUpRequest(BaseModel):
     def validate_password(cls, v: str) -> str:
         v = v.strip()
         if len(v) < 8:
-            raise ValueError("비밀번호는 최소 8자 이상이어야 합니다.")
+            raise ValueError("비밀번호는 최소 8자 이상이어야 합니다")
         if not re.search(r"[A-Za-z]", v):
-            raise ValueError("비밀번호에 최소 하나의 영문자가 포함되어야 합니다.")
+            raise ValueError("비밀번호에 최소 하나의 영문자가 포함되어야 합니다")
         if not re.search(r"\d", v):
-            raise ValueError("비밀번호에 최소 하나의 숫자가 포함되어야 합니다.")
+            raise ValueError("비밀번호에 최소 하나의 숫자가 포함되어야 합니다")
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
-            raise ValueError("비밀번호에 최소 하나의 특수문자가 포함되어야 합니다.")
+            raise ValueError("비밀번호에 최소 하나의 특수문자가 포함되어야 합니다")
         return v
