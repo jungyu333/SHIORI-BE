@@ -5,12 +5,12 @@ from typing import Optional
 
 @dataclass
 class User:
-    id: Optional[int]
     email: str
     password: str
     nickname: Optional[str]
-    created_at: datetime
-    updated_at: datetime
+    id: Optional[int] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     @classmethod
     def from_model(cls, model) -> "User":
