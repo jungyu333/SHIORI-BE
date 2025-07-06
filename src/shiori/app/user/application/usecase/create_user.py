@@ -1,4 +1,4 @@
-from ..service.user_service import UserService
+from shiori.app.user.application.service import UserService
 
 
 class CreateUserUseCase:

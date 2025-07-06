@@ -1,6 +1,5 @@
-from fastapi import HTTPException
-
 from shiori.app.core.database import Transactional
+from shiori.app.core.exceptions import ValidationException
 from shiori.app.user.domain.entity import UserVO
 from shiori.app.user.domain.repository import UserRepository
 
@@ -16,7 +15,7 @@ class UserService:
         existed_user = await self._user_repo.get_user_by_email(email)
 
         if existed_user:
-            raise HTTPException(status_code=422, detail="User already exists")
+            raise ValidationException(message="이미 존재하는 회원입니다")
 
         userVO = UserVO(email=email, password=password, nickname=nickname)
 

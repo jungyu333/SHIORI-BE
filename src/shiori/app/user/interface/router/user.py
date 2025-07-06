@@ -1,11 +1,10 @@
-from dependency_injector.providers import Provider
-from dependency_injector.wiring import inject
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Body, Depends
 
+from shiori.app.container import Container
 from shiori.app.core.response import StandardResponse
-
-from ...application.usecase import CreateUserUseCase
-from ..dto import SignUpRequest, SignUpResponse
+from shiori.app.user.application.usecase import CreateUserUseCase
+from shiori.app.user.interface.dto import SignUpRequest, SignUpResponse
 
 router = APIRouter()
 
@@ -14,7 +13,7 @@ router = APIRouter()
 @inject
 async def signup(
     request: SignUpRequest = Body(...),
-    create_user_use_case: CreateUserUseCase = Depends(Provider[CreateUserUseCase]),
+    create_user_use_case: CreateUserUseCase = Depends(Provide[Container.create_user]),
 ):
 
     email = request.email

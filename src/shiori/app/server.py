@@ -5,15 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from .container import Container
-from .core.exceptions import BaseCustomException, ValidationException
-from .core.middleware import (RequestLogMiddleware, ResponseLogMiddleware,
-                              SQLAlchemyMiddleware)
-from .user.interface.router import user_router
+from shiori.app.container import Container
+from shiori.app.core.exceptions import BaseCustomException, ValidationException
+from shiori.app.core.middleware import (RequestLogMiddleware,
+                                        ResponseLogMiddleware,
+                                        SQLAlchemyMiddleware)
+from shiori.app.user.interface.router import user_router
 
 
 def init_router(app_: FastAPI) -> None:
-    container = Container()
+
     app_.include_router(user_router, prefix="/api/user", tags=["user"])
 
 
@@ -67,12 +68,17 @@ def make_middleware() -> list[Middleware]:
 
 
 def create_app() -> FastAPI:
+    container = Container()
+
     app_ = FastAPI(
         title="Shiori Be",
         description="Shiori Be",
         version="1.0.0",
         middleware=make_middleware(),
     )
+
+    app_.container = container
+
     init_router(app_)
     init_listener(app_)
 
