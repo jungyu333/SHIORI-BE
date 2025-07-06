@@ -16,3 +16,13 @@ class UserRepositoryImpl(UserRepository):
         if not user:
             return None
         return UserVO.from_model(user)
+
+    async def save(self, user: UserVO) -> int:
+        model = user.to_model()
+
+        session.add(model)
+
+        await session.flush()
+
+        return model.id
+
