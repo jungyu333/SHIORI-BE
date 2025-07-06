@@ -9,14 +9,22 @@ class User:
     email: str
     password: str
     nickname: Optional[str]
-    avatar_id: Optional[int]
     created_at: datetime
     updated_at: datetime
 
     @classmethod
-    def from_model(cls, model):
-        pass
+    def from_model(cls, model) -> "User":
+        user = User(
+            id=model.id,
+            email=model.email,
+            password=model.password,
+            nickname=model.nickname,
+            created_at=model.created_at,
+            updated_at=model.updated_at,
+        )
+
+        return user
 
     @classmethod
-    def to_model(cls, model):
+    def to_model(cls, user):
         pass
