@@ -30,7 +30,9 @@ packages = [{ include = "shiori", from = "src" }]
 pytest = "^8.4.0"
 black = "^25.1.0"
 pytest-asyncio = "^1.0.0"
+httpx = "^0.26.0"
 isort = "^6.0.1"
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

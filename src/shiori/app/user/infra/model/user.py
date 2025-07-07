@@ -2,7 +2,8 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from shiori.app.core.database.mixins import TimestampMixin
-from shiori.app.core.database.session import Base
+## src 부터 import!
+from src.shiori.app.core.database.session import Base
 
 
 class User(Base, TimestampMixin):

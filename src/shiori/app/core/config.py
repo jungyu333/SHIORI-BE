@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
-from ..utils import get_root_path
+from shiori.app.utils import get_root_path
 
 BASE_DIR = get_root_path(Path(__file__).resolve())
 ENV_DIR = BASE_DIR / "environment"
@@ -43,8 +43,10 @@ class TestConfig(BaseConfig):
 @lru_cache()
 def get_settings() -> BaseConfig:
     env = os.getenv("ENV", "dev").lower()
+
     if env == "prod":
         return ProductionConfig()
     if env == "test":
         return TestConfig()
+
     return DevelopmentConfig()

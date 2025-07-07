@@ -24,4 +24,4 @@ run-revision:
 	alembic revision --autogenerate -m "$(MESSAGE)"
 
 run-test:
-	pytest tests -s
+	poetry run pytest tests -s
