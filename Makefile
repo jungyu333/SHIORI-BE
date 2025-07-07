@@ -24,4 +24,4 @@ run-revision:
 	alembic revision --autogenerate -m "$(MESSAGE)"
 
 run-test:
-	ENV=test pytest tests -s
+	pytest tests -s

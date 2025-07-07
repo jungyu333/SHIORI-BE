@@ -1,4 +1,5 @@
 import asyncio
+import os
 from uuid import uuid4
 
 import pytest
@@ -8,6 +9,8 @@ from shiori.app.core.database.session import reset_session_context
 from shiori.app.core.database.session import session as db_session
 from shiori.app.core.database.session import set_session_context
 from tests.support.test_db_coordinator import TestDbCoordinator
+
+os.environ.setdefault("ENV", "test")
 
 test_db_coordinator = TestDbCoordinator()
 
