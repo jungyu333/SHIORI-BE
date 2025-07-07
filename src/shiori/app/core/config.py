@@ -15,12 +15,8 @@ class BaseConfig(BaseSettings):
     DEBUG: bool = True
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8080
-    WRITER_DB_URL: str = (
-        "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori"
-    )
-    READER_DB_URL: str = (
-        "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori"
-    )
+    WRITER_DB_URL: str = "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori"
+    READER_DB_URL: str = "mysql+aiomysql://fastapi:fastapi@localhost:33306/shiori"
     JWT_SECRET_KEY: str = "shiori"
     JWT_ALGORITHM: str = "HS256"
 
@@ -39,9 +35,16 @@ class ProductionConfig(BaseConfig):
         env_file = ENV_DIR / ".env.production"
 
 
+class TestConfig(BaseConfig):
+    class Config(BaseConfig.Config):
+        env_file = ENV_DIR / ".env.test"
+
+
 @lru_cache()
 def get_settings() -> BaseConfig:
     env = os.getenv("ENV", "dev").lower()
     if env == "prod":
         return ProductionConfig()
+    if env == "test":
+        return TestConfig()
     return DevelopmentConfig()
