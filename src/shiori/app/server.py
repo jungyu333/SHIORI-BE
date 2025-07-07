@@ -15,7 +15,7 @@ from shiori.app.user.interface.router import user_router
 
 def init_router(app_: FastAPI) -> None:
 
-    app_.include_router(user_router, prefix="/api/user", tags=["user"])
+    app_.include_router(user_router, prefix="/api/user", tags=["User"])
 
 
 def init_listener(app_: FastAPI) -> None:

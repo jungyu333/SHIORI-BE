@@ -9,7 +9,7 @@ from shiori.app.user.interface.dto import SignUpRequest, SignUpResponse
 router = APIRouter()
 
 
-@router.post("/signup", response_model=StandardResponse, tags=["User"])
+@router.post("/signup", response_model=StandardResponse)
 @inject
 async def signup(
     request: SignUpRequest = Body(...),
