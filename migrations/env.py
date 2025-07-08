@@ -1,14 +1,17 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "src")
+)
+
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import create_engine, pool
 
 import database_models  # noqa
-from src.shiori.app.core.database.session import Base
+from shiori.app.core.database.session import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
