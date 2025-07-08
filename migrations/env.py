@@ -1,14 +1,17 @@
 import os
 import sys
+
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "src")
+)
+
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import create_engine, pool
 
-import database_models
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
-
+import database_models  # noqa
+from shiori.app.core.database.session import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,7 +28,6 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 
 from src.shiori.app.core.config import get_settings
-from src.shiori.app.core.database import Base
 
 setting = get_settings()
 target_metadata = Base.metadata
@@ -83,3 +85,5 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+
+print("✅ Loaded tables:", Base.metadata.tables.keys())

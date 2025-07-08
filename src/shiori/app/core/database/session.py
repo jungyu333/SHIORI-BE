@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (AsyncSession, async_scoped_session,
 from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.sql.expression import Delete, Insert, Update
 
-from ..config import get_settings
+from shiori.app.core.config import get_settings
 
 setting = get_settings()
 
@@ -57,7 +57,8 @@ session = async_scoped_session(
 )
 
 
-class Base(DeclarativeBase): ...
+class Base(DeclarativeBase):
+    pass
 
 
 @asynccontextmanager

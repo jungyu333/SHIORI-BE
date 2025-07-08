@@ -1,20 +1,44 @@
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
-from .container import Container
-from .core.exceptions import BaseCustomException
-from .core.middleware import (RequestLogMiddleware, ResponseLogMiddleware,
-                              SQLAlchemyMiddleware)
+from shiori.app.container import Container
+from shiori.app.core.exceptions import BaseCustomException, ValidationException
+from shiori.app.core.middleware import (RequestLogMiddleware,
+                                        ResponseLogMiddleware,
+                                        SQLAlchemyMiddleware)
+from shiori.app.user.interface.router import user_router
 
 
 def init_router(app_: FastAPI) -> None:
-    container = Container()
+
+    app_.include_router(user_router, prefix="/api/user", tags=["User"])
 
 
 def init_listener(app_: FastAPI) -> None:
+
+    @app_.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
+        errors = exc.errors()
+
+        def clean_msg(msg: str) -> str:
+            if msg.lower().startswith("value error, "):
+                return msg[13:].strip()
+            return msg
+
+        first_msg = (
+            clean_msg(errors[0]["msg"]) if errors else "요청값이 올바르지 않습니다"
+        )
+
+        validation_exc = ValidationException(message=first_msg, data=None)
+
+        return await custom_exception_handler(request, validation_exc)
+
     @app_.exception_handler(BaseCustomException)
     async def custom_exception_handler(request: Request, exc: BaseCustomException):
         return JSONResponse(
@@ -44,12 +68,17 @@ def make_middleware() -> list[Middleware]:
 
 
 def create_app() -> FastAPI:
+    container = Container()
+
     app_ = FastAPI(
         title="Shiori Be",
         description="Shiori Be",
         version="1.0.0",
         middleware=make_middleware(),
     )
+
+    app_.container = container
+
     init_router(app_)
     init_listener(app_)
 

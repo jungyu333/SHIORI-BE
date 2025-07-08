@@ -2,18 +2,20 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
+from shiori.app.user.infra.model import User as User_Model
+
 
 @dataclass
 class User:
-    id: int
     email: str
     password: str
     nickname: Optional[str]
-    created_at: datetime
-    updated_at: datetime
+    id: Optional[int] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     @classmethod
-    def from_model(cls, model) -> "User":
+    def from_model(cls, model: User_Model) -> "User":
         user = User(
             id=model.id,
             email=model.email,
@@ -25,6 +27,10 @@ class User:
 
         return user
 
-    @classmethod
-    def to_model(cls, user):
-        pass
+    def to_model(self) -> User_Model:
+        user = User_Model(
+            email=self.email,
+            password=self.password,
+            nickname=self.nickname,
+        )
+        return user

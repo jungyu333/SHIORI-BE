@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-from ...core.schema import LogResult
+from shiori.app.core.schema import LogResult
 
 
 class ColorFormatter(logging.Formatter):

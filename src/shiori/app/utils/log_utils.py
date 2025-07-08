@@ -5,7 +5,7 @@ from pathlib import Path
 
 import aiofiles
 
-from ..core.schema import LogResult
+from shiori.app.core.schema import LogResult
 
 BASE_LOG_DIR = Path("log")
 BASE_LOG_DIR.mkdir(exist_ok=True)

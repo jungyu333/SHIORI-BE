@@ -1,1 +1,1 @@
-from src.shiori.app.user.infra.model import User
+from shiori.app.user.infra.model import User

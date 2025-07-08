@@ -1,8 +1,8 @@
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from ....core.database.mixins import TimestampMixin
-from ....core.database.session import Base
+from shiori.app.core.database.mixins import TimestampMixin
+from shiori.app.core.database.session import Base
 
 
 class User(Base, TimestampMixin):

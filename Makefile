@@ -22,3 +22,6 @@ run-rollback:
 
 run-revision:
 	alembic revision --autogenerate -m "$(MESSAGE)"
+
+run-test:
+	poetry run pytest tests -s
