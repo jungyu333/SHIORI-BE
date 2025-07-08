@@ -4,7 +4,7 @@ import pytest
 
 from shiori.app.core.exceptions import ValidationException
 from shiori.app.user.application.service import UserService
-from shiori.app.user.domain.entity.user import User as UserVO
+from shiori.app.user.domain.entity import UserVO
 from shiori.app.user.domain.repository import UserRepository
 
 repository_mock = AsyncMock(spec=UserRepository)
@@ -30,6 +30,7 @@ async def test_create_user():
     assert user_id is not None
     repository_mock.save.assert_awaited_once()
 
+
 @pytest.mark.asyncio
 async def test_create_user_duplicate_email():
     # Given
@@ -47,5 +48,6 @@ async def test_create_user_duplicate_email():
 
     # When, Then
     with pytest.raises(ValidationException):
-        await user_service.create_user(email=email, password=password, nickname=nickname)
-
+        await user_service.create_user(
+            email=email, password=password, nickname=nickname
+        )
