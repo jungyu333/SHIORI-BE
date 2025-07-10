@@ -3,10 +3,9 @@ import re
 from pydantic import BaseModel, Field, field_validator
 
 
-class SignUpRequest(BaseModel):
+class SignInRequest(BaseModel):
     email: str = Field(..., examples=["jungyu3826@gmail.com"])
     password: str = Field(..., examples=["rlawnsrb1!"])
-    nickname: str = Field(..., examples=["jungyu"])
 
     @field_validator("email")
     @classmethod
@@ -32,3 +31,9 @@ class SignUpRequest(BaseModel):
         if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
             raise ValueError("비밀번호에 최소 하나의 특수문자가 포함되어야 합니다")
         return v
+
+
+class SignUpRequest(SignInRequest):
+    email: str = Field(..., examples=["jungyu3826@gmail.com"])
+    password: str = Field(..., examples=["rlawnsrb1!"])
+    nickname: str = Field(..., examples=["jungyu"])
