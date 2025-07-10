@@ -19,7 +19,7 @@ class UserService:
         if existed_user:
             raise ValidationException(message="이미 존재하는 회원입니다")
 
-        userVO = UserVO(email=email, password= self._crypto.encrypt(password), nickname=nickname)
+        userVO = UserVO(email=email, password= self._crypto.encrypt(password), nickname=nickname, is_admin=False)
 
         user_id = await self._user_repo.save(userVO)
 
