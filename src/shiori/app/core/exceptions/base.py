@@ -37,6 +37,12 @@ class ExpiredTokenException(BaseCustomException):
     def __init__(self, message: str = "TOKEN__EXPIRE_TOKEN", data=None):
         super().__init__(code=401, message=message, data=data)
 
+
 class AuthenticationException(BaseCustomException):
     def __init__(self, message: str = "인증에 실패했습니다", data=None):
+        super().__init__(code=401, message=message, data=data)
+
+
+class UnauthorizedException(BaseCustomException):
+    def __init__(self, message: str = "권한이 없습니다", data=None):
         super().__init__(code=401, message=message, data=data)
