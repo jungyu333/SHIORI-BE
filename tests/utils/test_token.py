@@ -4,6 +4,7 @@ import jwt
 import pytest
 
 from shiori.app.core import get_settings
+from shiori.app.core.exceptions import DecodeTokenException
 from shiori.app.utils.helpers import TokenHelper
 
 config = get_settings()
@@ -33,7 +34,9 @@ def test_encode():
 @pytest.mark.asyncio
 def test_decode():
     # Given
-    token = jwt.encode({"user_id": 1, 'is_admin': True}, config.JWT_SECRET_KEY, config.JWT_ALGORITHM)
+    token = jwt.encode(
+        {"user_id": 1, "is_admin": True}, config.JWT_SECRET_KEY, config.JWT_ALGORITHM
+    )
 
     # When
     sut = TokenHelper.decode(token=token)
@@ -41,3 +44,13 @@ def test_decode():
     # Then
     assert sut["user_id"] == 1
     assert sut["is_admin"] == True
+
+
+@pytest.mark.asyncio
+def test_decode_expired_decode_error():
+    # Given
+    token = "invalid-token"
+
+    # When, Then
+    with pytest.raises(DecodeTokenException):
+        TokenHelper.decode(token=token)
