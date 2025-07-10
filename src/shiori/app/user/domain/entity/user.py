@@ -10,6 +10,7 @@ class User:
     email: str
     password: str
     nickname: Optional[str]
+    is_admin: bool
     id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -21,6 +22,7 @@ class User:
             email=model.email,
             password=model.password,
             nickname=model.nickname,
+            is_admin=model.is_admin,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
@@ -32,5 +34,6 @@ class User:
             email=self.email,
             password=self.password,
             nickname=self.nickname,
+            is_admin=self.is_admin,
         )
         return user
