@@ -42,6 +42,7 @@ async def test_create_user_duplicate_email():
         email=email,
         password=password,
         nickname=nickname,
+        is_admin=False,
     )
 
     repository_mock.get_user_by_email.return_value = user

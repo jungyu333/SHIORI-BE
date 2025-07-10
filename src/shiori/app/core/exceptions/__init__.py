@@ -1,5 +1,7 @@
-from .base import (BaseCustomException, ForbiddenException, NotFoundException,
-                   ServerErrorException, ValidationException)
+from .base import (AuthenticationException, BaseCustomException,
+                   DecodeTokenException, ExpiredTokenException,
+                   ForbiddenException, NotFoundException, ServerErrorException,
+                   UnauthorizedException, ValidationException)
 
 __all__ = [
     "BaseCustomException",
@@ -7,4 +9,8 @@ __all__ = [
     "ForbiddenException",
     "ServerErrorException",
     "ValidationException",
+    "AuthenticationException",
+    "DecodeTokenException",
+    "ExpiredTokenException",
+    "UnauthorizedException",
 ]

@@ -6,8 +6,11 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
 from shiori.app.container import Container
-from shiori.app.core.exceptions import BaseCustomException, ValidationException
-from shiori.app.core.middleware import (RequestLogMiddleware,
+from shiori.app.core.exceptions import (AuthenticationException,
+                                        BaseCustomException,
+                                        ValidationException)
+from shiori.app.core.middleware import (AuthBackend, AuthenticationMiddleware,
+                                        RequestLogMiddleware,
                                         ResponseLogMiddleware,
                                         SQLAlchemyMiddleware)
 from shiori.app.user.interface.router import user_router
@@ -51,6 +54,22 @@ def init_listener(app_: FastAPI) -> None:
         )
 
 
+def on_auth_error(request: Request, exc: Exception):
+    if isinstance(exc, BaseCustomException):
+        error = exc
+    else:
+        error = AuthenticationException(message=str(exc))
+
+    return JSONResponse(
+        status_code=error.code,
+        content={
+            "code": error.code,
+            "message": error.message,
+            "data": error.data,
+        },
+    )
+
+
 def make_middleware() -> list[Middleware]:
     middleware = [
         Middleware(
@@ -59,6 +78,11 @@ def make_middleware() -> list[Middleware]:
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
+        ),
+        Middleware(
+            AuthenticationMiddleware,
+            backend=AuthBackend(),
+            on_error=on_auth_error,
         ),
         Middleware(SQLAlchemyMiddleware),
         Middleware(RequestLogMiddleware),
