@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import jwt
 
 from shiori.app.core import get_settings
-from shiori.app.core.exceptions.base import (DecodeTokenException,
-                                             ExpiredTokenException)
+from shiori.app.core.exceptions import (DecodeTokenException,
+                                        ExpiredTokenException)
 
 config = get_settings()
 
