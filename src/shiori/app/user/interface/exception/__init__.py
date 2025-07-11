@@ -9,3 +9,8 @@ class UserNotFoundException(BaseCustomException):
 class AuthenticationException(BaseCustomException):
     def __init__(self, message: str = "비밀번호가 일치 하지 않습니다", data=None):
         super().__init__(code=401, message=message, data=data)
+
+
+class DuplicateUserException(BaseCustomException):
+    def __init__(self, message: str = "이미 존재하는 회원 입니다", data=None):
+        super().__init__(code=409, message=message, data=data)
