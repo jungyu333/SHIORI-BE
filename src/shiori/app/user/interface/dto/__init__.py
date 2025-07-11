@@ -1,4 +1,4 @@
-from .request import SignInRequest, SignUpRequest
+from .request import LogInRequest, SignUpRequest
 from .response import SignUpResponse
 
-__all__ = ["SignUpRequest", "SignUpResponse", 'SignInRequest']
+__all__ = ["SignUpRequest", "SignUpResponse", "LogInRequest"]

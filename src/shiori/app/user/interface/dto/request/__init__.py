@@ -3,7 +3,7 @@ import re
 from pydantic import BaseModel, Field, field_validator
 
 
-class SignInRequest(BaseModel):
+class LogInRequest(BaseModel):
     email: str = Field(..., examples=["jungyu3826@gmail.com"])
     password: str = Field(..., examples=["rlawnsrb1!"])
 
@@ -33,7 +33,7 @@ class SignInRequest(BaseModel):
         return v
 
 
-class SignUpRequest(SignInRequest):
+class SignUpRequest(LogInRequest):
     email: str = Field(..., examples=["jungyu3826@gmail.com"])
     password: str = Field(..., examples=["rlawnsrb1!"])
     nickname: str = Field(..., examples=["jungyu"])
