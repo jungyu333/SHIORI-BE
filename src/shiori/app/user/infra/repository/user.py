@@ -17,6 +17,7 @@ class UserRepositoryImpl(UserRepository):
         return UserVO.from_model(user)
 
     async def save(self, user: UserVO) -> int:
+
         model = user.to_model()
 
         session.add(model)
@@ -26,7 +27,7 @@ class UserRepositoryImpl(UserRepository):
         return model.id
 
     async def get_user_by_email_and_password(
-            self, email: str, password: str
+        self, email: str, password: str
     ) -> UserVO | None:
         stmt = await session.execute(
             select(User).where(and_(User.email == email, User.password == password))

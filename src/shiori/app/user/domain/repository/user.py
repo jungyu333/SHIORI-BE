@@ -15,6 +15,6 @@ class UserRepository(ABC):
 
     @abstractmethod
     async def get_user_by_email_and_password(
-            self, email: str, password: str
+        self, email: str, password: str
     ) -> UserVO | None:
         pass
