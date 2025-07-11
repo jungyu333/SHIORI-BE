@@ -17,13 +17,13 @@ config = get_settings()
 @inject
 async def signup(
     request: SignUpRequest = Body(...),
-    create_user_use_case: CreateUserUseCase = Depends(Provide[Container.create_user]),
+    use_case: CreateUserUseCase = Depends(Provide[Container.create_user]),
 ):
     email = request.email
     password = request.password
     nickname = request.nickname
 
-    user_id = await create_user_use_case.execute(email, password, nickname)
+    user_id = await use_case.execute(email, password, nickname)
 
     response = SignUpResponse(user_id=user_id)
 
