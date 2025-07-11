@@ -13,7 +13,7 @@ router = APIRouter()
 config = get_settings()
 
 
-@router.post("/signup", response_model=StandardResponse)
+@router.post("/signup", response_model=StandardResponse[SignUpResponse])
 @inject
 async def signup(
     request: SignUpRequest = Body(...),
@@ -30,7 +30,7 @@ async def signup(
     return {"code": 201, "message": "환영합니다!", "data": response}
 
 
-@router.post("/login", response_model=LogInResponse)
+@router.post("/login", response_model=StandardResponse[LogInResponse])
 @inject
 async def login(
     request: LogInRequest,
