@@ -8,7 +8,6 @@ from shiori.app.user.infra.model.user import User
 
 class UserRepositoryImpl(UserRepository):
     async def get_user_by_email(self, email: str) -> UserVO | None:
-
         stmt = await session.execute(select(User).where(User.email == email))
 
         user = stmt.scalars().first()
@@ -18,6 +17,7 @@ class UserRepositoryImpl(UserRepository):
         return UserVO.from_model(user)
 
     async def save(self, user: UserVO) -> int:
+
         model = user.to_model()
 
         session.add(model)
@@ -25,4 +25,3 @@ class UserRepositoryImpl(UserRepository):
         await session.flush()
 
         return model.id
-
