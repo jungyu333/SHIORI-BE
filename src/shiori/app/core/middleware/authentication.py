@@ -1,11 +1,13 @@
 import jwt
 from pydantic import BaseModel, Field
 from starlette.authentication import AuthenticationBackend
-from starlette.middleware.authentication import \
-    AuthenticationMiddleware as BaseAuthenticationMiddleware
+from starlette.middleware.authentication import (
+    AuthenticationMiddleware as BaseAuthenticationMiddleware,
+)
 from starlette.requests import HTTPConnection
 
 from shiori.app.core import get_settings
+from shiori.app.core.helpers import redis_client
 
 config = get_settings()
 
@@ -40,8 +42,17 @@ class AuthBackend(AuthenticationBackend):
                 config.JWT_SECRET_KEY,
                 algorithms=[config.JWT_ALGORITHM],
             )
+
+            jti = payload.get("jti")
+
+            if jti:
+                is_blacklisted = await redis_client.get(f"blacklist:{jti}")
+                if is_blacklisted:
+                    return False, current_user
+
             user_id = payload.get("user_id")
             is_admin = payload.get("is_admin")
+
         except jwt.exceptions.PyJWTError:
             return False, current_user
 
