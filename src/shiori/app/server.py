@@ -6,13 +6,19 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
 from shiori.app.container import Container
-from shiori.app.core.exceptions import (AuthenticationException,
-                                        BaseCustomException,
-                                        ValidationException)
-from shiori.app.core.middleware import (AuthBackend, AuthenticationMiddleware,
-                                        RequestLogMiddleware,
-                                        ResponseLogMiddleware,
-                                        SQLAlchemyMiddleware)
+from shiori.app.core.exceptions import (
+    AuthenticationException,
+    BaseCustomException,
+    ValidationException,
+)
+from shiori.app.core.helpers.cache import Cache, RedisBackend, CustomKeyMaker
+from shiori.app.core.middleware import (
+    AuthBackend,
+    AuthenticationMiddleware,
+    RequestLogMiddleware,
+    ResponseLogMiddleware,
+    SQLAlchemyMiddleware,
+)
 from shiori.app.user.interface.router import user_router
 
 
@@ -91,6 +97,10 @@ def make_middleware() -> list[Middleware]:
     return middleware
 
 
+def init_cache() -> None:
+    Cache.init(backend=RedisBackend(), key_maker=CustomKeyMaker())
+
+
 def create_app() -> FastAPI:
     container = Container()
 
@@ -105,6 +115,7 @@ def create_app() -> FastAPI:
 
     init_router(app_)
     init_listener(app_)
+    init_cache()
 
     return app_
 
