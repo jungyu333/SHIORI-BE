@@ -61,3 +61,12 @@ class UserService:
         )
 
         return token, refresh_token, user_id
+
+    def parse_logout_user(self, *, access_token: str) -> tuple[str, str, int]:
+        payload = TokenHelper.decode(access_token)
+
+        user_id = payload["user_id"]
+        jti = payload["jti"]
+        ttl = payload["exp"]
+
+        return user_id, jti, ttl
