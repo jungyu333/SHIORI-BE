@@ -15,8 +15,33 @@ services:
     networks:
       - shiori-net
 
+  redis:
+    image: redis:7
+    container_name: shiori-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - shiori-net
+
+  redis_insight:
+    image: redislabs/redisinsight:1.14.0
+    container_name: shiori-redisinsight
+    restart: always
+    depends_on:
+      - redis
+    ports:
+      - "8001:8001"
+    networks:
+      - shiori-net
+
 volumes:
   mysql_data:
+  redis_data:
 
 networks:
   shiori-net:
