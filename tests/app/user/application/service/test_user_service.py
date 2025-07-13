@@ -80,13 +80,14 @@ async def test_login():
 
     # When
 
-    access_token, refresh_token = await user_service.login(
+    access_token, refresh_token, user_id = await user_service.login(
         email="dummy@naver.com", password="rlawnsrb1!"
     )
 
     # Then
     assert isinstance(access_token, str)
     assert isinstance(refresh_token, str)
+    assert user_id == user.id
 
 
 @pytest.mark.asyncio
