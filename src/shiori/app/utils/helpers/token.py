@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 
 import jwt
@@ -11,10 +12,12 @@ config = get_settings()
 class TokenHelper:
     @staticmethod
     def encode(payload: dict, expire_period: int = 3600) -> str:
+        jti = str(uuid.uuid4())
         token = jwt.encode(
             payload = {
                 **payload,
                 "exp": datetime.now() + timedelta(seconds=expire_period),
+                "jti": jti,
             },
             key= config.JWT_SECRET_KEY,
             algorithm=config.JWT_ALGORITHM,
