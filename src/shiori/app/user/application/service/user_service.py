@@ -1,3 +1,5 @@
+import time
+
 from shiori.app.core.database import Transactional
 from shiori.app.user.domain.entity import UserVO
 from shiori.app.user.domain.repository import UserRepository
@@ -67,6 +69,6 @@ class UserService:
 
         user_id = payload["user_id"]
         jti = payload["jti"]
-        ttl = payload["exp"]
+        ttl = payload["exp"] - int(time.time())
 
         return user_id, jti, ttl
