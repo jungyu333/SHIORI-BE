@@ -21,7 +21,8 @@ dependencies = [
     "passlib[bcrypt] (>=1.7.4,<2.0.0)",
     "bcrypt (<4.0.0)",
     "pyjwt (==2.8.0)",
-    "redis (==5.0.1)"
+    "redis (==5.0.1)",
+    "ujson (==5.9.0)"
 ]
 
 [tool.poetry]
