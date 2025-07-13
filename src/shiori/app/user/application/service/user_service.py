@@ -34,7 +34,7 @@ class UserService:
 
         return user_id
 
-    async def login(self, email: str, password: str) -> tuple[str, str]:
+    async def login(self, email: str, password: str) -> tuple[str, str, int]:
         user = await self._user_repo.get_user_by_email(email)
 
         if not user:
@@ -45,9 +45,11 @@ class UserService:
         if not is_matched:
             raise AuthenticationException
 
+        user_id = user.id
+
         token = TokenHelper.encode(
             {
-                "user_id": user.id,
+                "user_id": user_id,
                 "is_admin": user.is_admin,
             }
         )
@@ -58,4 +60,4 @@ class UserService:
             }
         )
 
-        return token, refresh_token
+        return token, refresh_token, user_id
