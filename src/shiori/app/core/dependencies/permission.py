@@ -5,8 +5,7 @@ from fastapi import Request
 from fastapi.openapi.models import APIKey, APIKeyIn
 from fastapi.security.base import SecurityBase
 
-from shiori.app.core.exceptions import (BaseCustomException,
-                                        UnauthorizedException)
+from shiori.app.core.exceptions import BaseCustomException, UnauthorizedException
 
 
 class BasePermission(ABC):
@@ -23,10 +22,20 @@ class IsAuthenticated(BasePermission):
     async def has_permission(self, request: Request) -> bool:
         return request.user.id is not None
 
+
+class IsNotAuthenticated(BasePermission):
+    exception = UnauthorizedException
+
+    async def has_permission(self, request: Request) -> bool:
+        return request.user.id is None
+
+
 class IsAdmin(BasePermission):
     exception = UnauthorizedException
+
     async def has_permission(self, request: Request) -> bool:
         return request.user.is_admin is not None
+
 
 class AllowAll(BasePermission):
     async def has_permission(self, request: Request) -> bool:

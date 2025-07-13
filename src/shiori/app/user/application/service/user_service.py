@@ -1,3 +1,5 @@
+import time
+
 from shiori.app.core.database import Transactional
 from shiori.app.user.domain.entity import UserVO
 from shiori.app.user.domain.repository import UserRepository
@@ -61,3 +63,12 @@ class UserService:
         )
 
         return token, refresh_token, user_id
+
+    def parse_logout_user(self, *, access_token: str) -> tuple[str, str, int]:
+        payload = TokenHelper.decode(access_token)
+
+        user_id = payload["user_id"]
+        jti = payload["jti"]
+        ttl = payload["exp"] - int(time.time())
+
+        return user_id, jti, ttl
