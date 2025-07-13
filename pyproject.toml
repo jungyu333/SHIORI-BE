@@ -20,7 +20,8 @@ dependencies = [
     "aiofiles (>=24.1.0,<25.0.0)",
     "passlib[bcrypt] (>=1.7.4,<2.0.0)",
     "bcrypt (<4.0.0)",
-    "pyjwt (==2.8.0)"
+    "pyjwt (==2.8.0)",
+    "redis (==5.0.1)"
 ]
 
 [tool.poetry]
