@@ -13,8 +13,9 @@ async def test_execute():
     # Given
     email = "dummy@naver.com"
     password = "rlawnsrb1!"
+    user_id = 1
 
-    user_service_mock.login.return_value = "token", "refresh_token"
+    user_service_mock.login.return_value = "token", "refresh_token", user_id
 
     use_case = LoginUserUseCase(user_service=user_service_mock)
 
