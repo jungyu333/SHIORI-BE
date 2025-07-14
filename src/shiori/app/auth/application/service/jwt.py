@@ -7,29 +7,36 @@ from shiori.app.core.exceptions.base import (
 from shiori.app.core.exceptions.base import (
     ExpiredTokenException as JwtExpiredTokenException,
 )
+from shiori.app.core.helpers import redis_client
 from shiori.app.utils.helpers import TokenHelper
 
 
 class JwtService(Jwt):
     async def create_refresh_token(
-        self, token: str, refresh_token: str
+        self, *, token: str, refresh_token: str
     ) -> RefreshTokenResponse:
-        decoded_created_token = TokenHelper.decode(token=token)
+        decoded_access_token = TokenHelper.decode_expired_token(token=token)
+        jti = decoded_access_token.get("jti")
+
         decoded_refresh_token = TokenHelper.decode(token=refresh_token)
         if decoded_refresh_token.get("sub") != "refresh":
             raise DecodeTokenException
 
+        is_blacklisted = await redis_client.exists(f"blacklist:{jti}")
+        if is_blacklisted:
+            raise JwtExpiredTokenException
+
         return RefreshTokenResponse(
             token=TokenHelper.encode(
                 payload={
-                    "user_id": decoded_created_token.get("user_id"),
-                    "is_admin": decoded_created_token.get("is_admin"),
+                    "user_id": decoded_access_token.get("user_id"),
+                    "is_admin": decoded_access_token.get("is_admin"),
                 }
             ),
             refresh_token=TokenHelper.encode(payload={"sub": "refresh"}),
         )
 
-    async def verify_token(self, token: str) -> None:
+    async def verify_token(self, *, token: str) -> None:
         try:
             TokenHelper.decode(token=token)
         except (JwtDecodeTokenException, JwtExpiredTokenException):
