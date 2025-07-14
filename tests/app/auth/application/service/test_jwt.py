@@ -1,6 +1,6 @@
 import pytest
 
-from shiori.app.auth.application import JwtService
+from shiori.app.auth.application.service import JwtService
 from shiori.app.core import get_settings
 from shiori.app.core.exceptions import DecodeTokenException
 from shiori.app.utils.helpers import TokenHelper
