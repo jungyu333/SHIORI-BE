@@ -11,7 +11,7 @@ config = get_settings()
 
 
 @pytest.mark.asyncio
-def test_encode():
+async def test_encode():
     # Given
     payload = {
         "user_id": 1,
@@ -32,7 +32,7 @@ def test_encode():
 
 
 @pytest.mark.asyncio
-def test_decode():
+async def test_decode():
     # Given
     token = jwt.encode(
         {"user_id": 1, "is_admin": True}, config.JWT_SECRET_KEY, config.JWT_ALGORITHM
@@ -47,7 +47,7 @@ def test_decode():
 
 
 @pytest.mark.asyncio
-def test_decode_expired_decode_error():
+async def test_decode_expired_decode_error():
     # Given
     token = "invalid-token"
 
