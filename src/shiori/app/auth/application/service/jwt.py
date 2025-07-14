@@ -17,6 +17,8 @@ class JwtService(Jwt):
     ) -> RefreshTokenResponse:
         decoded_access_token = TokenHelper.decode_expired_token(token=token)
         jti = decoded_access_token.get("jti")
+        user_id = decoded_access_token.get("user_id")
+        is_admin = decoded_access_token.get("is_admin")
 
         decoded_refresh_token = TokenHelper.decode(token=refresh_token)
         if decoded_refresh_token.get("sub") != "refresh":
@@ -26,11 +28,16 @@ class JwtService(Jwt):
         if is_blacklisted:
             raise JwtExpiredTokenException
 
+        key = f"refresh:{user_id}"
+        ttl = 60 * 60 * 24 * 7  # 7days
+
+        await redis_client.set(key, refresh_token, ex=ttl)
+
         return RefreshTokenResponse(
             token=TokenHelper.encode(
                 payload={
-                    "user_id": decoded_access_token.get("user_id"),
-                    "is_admin": decoded_access_token.get("is_admin"),
+                    "user_id": user_id,
+                    "is_admin": is_admin,
                 }
             ),
             refresh_token=TokenHelper.encode(payload={"sub": "refresh"}),

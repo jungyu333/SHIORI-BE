@@ -13,7 +13,7 @@ from shiori.app.user.infra.repository.user import UserRepositoryImpl
 
 
 class Container(DeclarativeContainer):
-    wiring_config = WiringConfiguration(packages=["shiori.app.user"])
+    wiring_config = WiringConfiguration(packages=["shiori.app.user", "shiori.app.auth"])
 
     jwt_service = Factory(JwtService)
 
