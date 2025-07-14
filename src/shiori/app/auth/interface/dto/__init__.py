@@ -1,3 +1,3 @@
-from .response import RefreshTokenResponse
+from .response import RefreshTokenResponse, RefreshResponse
 
-__all__ = ["RefreshTokenResponse"]
+__all__ = ["RefreshTokenResponse", "RefreshResponse"]
