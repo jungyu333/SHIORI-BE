@@ -2,7 +2,7 @@ from dependency_injector.containers import DeclarativeContainer, WiringConfigura
 from dependency_injector.providers import Factory
 
 from shiori.app.auth.application.service import JwtService
-from shiori.app.auth.application.usecase import RefreshUseCase
+from shiori.app.auth.application.usecase import RefreshUseCase, VerifyTokenUseCase
 from shiori.app.user.application.service import UserService
 from shiori.app.user.application.usecase import (
     CreateUserUseCase,
@@ -30,3 +30,4 @@ class Container(DeclarativeContainer):
     login_user = Factory(LoginUserUseCase, user_service=user_service)
     logout_user = Factory(LogoutUserUseCase, user_service=user_service)
     refresh = Factory(RefreshUseCase, jwt_service=jwt_service)
+    verify_token = Factory(VerifyTokenUseCase, jwt_service=jwt_service)
