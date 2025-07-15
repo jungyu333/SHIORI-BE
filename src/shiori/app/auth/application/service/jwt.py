@@ -45,6 +45,11 @@ class JwtService(Jwt):
 
     async def verify_token(self, *, token: str) -> None:
         try:
-            TokenHelper.decode(token=token)
+            decoded_token = TokenHelper.decode(token=token)
+            jti = decoded_token.get("jti")
+
+            if await redis_client.exists(f"blacklist:{jti}"):
+                raise JwtExpiredTokenException
+
         except (JwtDecodeTokenException, JwtExpiredTokenException):
             raise DecodeTokenException
