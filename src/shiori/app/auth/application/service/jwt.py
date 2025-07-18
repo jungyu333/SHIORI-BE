@@ -40,7 +40,9 @@ class JwtService(Jwt):
                     "is_admin": is_admin,
                 }
             ),
-            refresh_token=TokenHelper.encode(payload={"sub": "refresh"}),
+            refresh_token=TokenHelper.encode(
+                payload={"sub": "refresh"}, expire_period=ttl
+            ),
         )
 
     async def verify_token(self, *, token: str) -> None:

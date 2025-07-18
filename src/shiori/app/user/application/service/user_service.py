@@ -59,7 +59,8 @@ class UserService:
         refresh_token = TokenHelper.encode(
             {
                 "sub": "refresh",
-            }
+            },
+            expire_period=60 * 60 * 24 * 7,
         )
 
         return token, refresh_token, user_id
