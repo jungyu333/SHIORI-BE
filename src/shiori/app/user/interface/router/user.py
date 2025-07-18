@@ -62,7 +62,7 @@ async def login(
         httponly=True,
         secure=config.ENV == "production",
         samesite="strict",
-        path="/api/auth/refresh",
+        path="/",
     )
 
     return {
