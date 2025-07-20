@@ -82,6 +82,7 @@ async def login(
 @inject
 async def logout(
     request: Request,
+    response: Response,
     use_case: LogoutUserUseCase = Depends(Provide[Container.logout_user]),
 ):
 
@@ -89,6 +90,11 @@ async def logout(
     scheme, credentials = authorization.split(" ", 1)
 
     await use_case.execute(access_token=credentials)
+
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+    )
 
     return {
         "code": 200,
