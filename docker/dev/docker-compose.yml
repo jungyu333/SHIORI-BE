@@ -48,10 +48,13 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 1234
-      MONGO_INITDB_DATABASE: shiori
+      MONGO_INITDB_DATABASE: admin
     ports:
       - "27017:27017"
+    command: ["mongod", "--config", "/etc/mongo/mongod.conf"]
     volumes:
+      - ./mongo/mongod.conf:/etc/mongo/mongod.conf
+      - ./mongo/mongodb.key:/etc/mongo/mongodb.key
       - mongo_data:/data/db
     networks:
       - shiori-net
