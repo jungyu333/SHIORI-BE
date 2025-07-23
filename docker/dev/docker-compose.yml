@@ -41,10 +41,27 @@ services:
     networks:
       - shiori-net
 
+  mongodb:
+    image: mongo:8.0
+    container_name: shiori-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+      MONGO_INITDB_DATABASE: shiori
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - shiori-net
+
+
 volumes:
   mysql_data:
   redis_data:
   redis_insight_data:
+  mongo_data:
 
 networks:
   shiori-net:
