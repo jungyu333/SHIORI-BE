@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 
 from shiori.app.auth.interface.router import auth_router
 from shiori.app.container import Container
+from shiori.app.core.database import lifespan_context
 from shiori.app.core.exceptions import (
     AuthenticationException,
     BaseCustomException,
@@ -110,6 +111,7 @@ def create_app() -> FastAPI:
         description="Shiori Be",
         version="1.0.0",
         middleware=make_middleware(),
+        lifespan=lifespan_context,
     )
 
     app_.container = container

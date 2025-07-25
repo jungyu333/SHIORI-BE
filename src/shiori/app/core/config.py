@@ -22,6 +22,8 @@ class BaseConfig(BaseSettings):
     REDIS_DB: int = 0
     JWT_SECRET_KEY: str = "shiori"
     JWT_ALGORITHM: str = "HS256"
+    MONGO_DB_URL: str
+    MONGO_DB_NAME: str = "shiori"
 
     class Config:
         env_file = ENV_DIR / ".env.development"  # fallback
