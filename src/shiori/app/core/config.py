@@ -23,7 +23,7 @@ class BaseConfig(BaseSettings):
     JWT_SECRET_KEY: str = "shiori"
     JWT_ALGORITHM: str = "HS256"
     MONGO_DB_URL: str
-    MONGO_DB_NAME: str = "shiori"
+    MONGO_DB_NAME: str
 
     class Config:
         env_file = ENV_DIR / ".env.development"  # fallback
