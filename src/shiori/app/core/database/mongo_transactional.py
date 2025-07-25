@@ -19,8 +19,9 @@ class MongoTransactional:
             async with await mongo_client.start_session() as session:
                 set_mongo_session(session)
                 try:
-                    kwargs[self.session] = session
-                    return await func(*args, **kwargs)
+                    async with session.start_transaction():
+                        kwargs[self.session] = session
+                        return await func(*args, **kwargs)
                 except PyMongoError as e:
                     raise e
                 finally:
