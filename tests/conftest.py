@@ -10,9 +10,13 @@ os.environ["ENV"] = "test"
 from shiori.app.core.database.session import reset_session_context
 from shiori.app.core.database.session import session as db_session
 from shiori.app.core.database.session import set_session_context
+from shiori.app.core.database import reset_mongo_session
+
+from tests.support.test_mongo_coordinator import TestMongoCoordinator
 from tests.support.test_db_coordinator import TestDbCoordinator
 
 test_db_coordinator = TestDbCoordinator()
+test_mongo_coordinator = TestMongoCoordinator()
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -36,3 +40,22 @@ async def session():
     yield db_session
     await db_session.remove()
     test_db_coordinator.truncate_all()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def init_beanie_once():
+    await test_mongo_coordinator.init_beanie_odm()
+
+
+@pytest.fixture(scope="function")
+def mongo_test_context(request):
+    if "mongo" not in request.keywords:
+        yield
+        return
+
+    request.getfixturevalue("init_beanie_once")
+
+    yield
+    reset_mongo_session()
+
+    test_mongo_coordinator.truncate_all()
