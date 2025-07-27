@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from shiori.app.core.database.mixins import TimestampMixin
 from shiori.app.core.database.session import Base
-from shiori.app.diary.infra.model import DiaryMeta
 
 
 class User(Base, TimestampMixin):
