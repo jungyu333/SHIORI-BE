@@ -1,45 +1,49 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TypedDict, Literal, Optional
+from typing import Literal, Optional
+
+from pydantic import BaseModel
+
+from shiori.app.diary.infra.model import DiaryDocument
 
 
-class Mark(TypedDict):
+class Mark(BaseModel):
     type: Literal["bold", "italic", "strike", "underline"]
 
 
-class TextNode(TypedDict):
+class TextNode(BaseModel):
     type: Literal["text"]
     text: str
-    marks: Optional[list[Mark]]
+    marks: Optional[list[Mark]] = None
 
 
-class NodeAttrs(TypedDict, total=False):
-    textAlign: Optional[Literal["left", "center", "right"]]
-    level: Optional[int]
+class NodeAttrs(BaseModel):
+    textAlign: Optional[Literal["left", "center", "right"]] = None
+    level: Optional[int] = None
 
 
-class ContentNode(TypedDict):
+class ContentNode(BaseModel):
     type: str
-    attrs: Optional[NodeAttrs]
-    content: Optional[list[TextNode]]
+    attrs: Optional[NodeAttrs] = None
+    content: Optional[list[TextNode]] = None
 
 
-class ProseMirror(TypedDict):
+class ProseMirror(BaseModel):
     type: Literal["doc"]
     content: list[ContentNode]
 
 
-class DiaryBlock(TypedDict):
+class DiaryBlock(BaseModel):
     order: int
     type: Literal["paragraph", "heading", "quote", "todo", "divider"]
-    content: Optional[str]
-    level: Optional[int]
-    textAlign: Optional[Literal["left", "center", "right"]]
-    marks: Optional[list[Literal["bold", "italic", "strike"]]]
-    is_in_quote: Optional[bool]
-    parent_type: Optional[str]
-    token_length: Optional[int]
-    checked: Optional[bool]
+    content: Optional[str] = None
+    level: Optional[int] = None
+    textAlign: Optional[Literal["left", "center", "right"]] = None
+    marks: Optional[list[Literal["bold", "italic", "strike"]]] = None
+    is_in_quote: Optional[bool] = None
+    parent_type: Optional[str] = None
+    token_length: Optional[int] = None
+    checked: Optional[bool] = None
 
 
 @dataclass
@@ -67,8 +71,8 @@ class Diary:
         )
         return diary
 
-    def to_model(self):
-        diary = Diary(
+    def to_model(self) -> DiaryDocument:
+        diary = DiaryDocument(
             diary_meta_id=self.diary_meta_id,
             date=self.date,
             diary_content=self.diary_content,
