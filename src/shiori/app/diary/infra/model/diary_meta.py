@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, ForeignKey, String, Enum, Boolean
+from sqlalchemy import Integer, ForeignKey, String, Enum, Boolean, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from shiori.app.core.database.mixins import TimestampMixin
@@ -9,6 +9,9 @@ from shiori.app.user.infra.model.user import User
 
 class DiaryMeta(Base, TimestampMixin):
     __tablename__ = "diary_meta"
+    __table_args__ = (
+        Index("ix_diary_meta_user_id_date", "user_id", "date", unique=True),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
