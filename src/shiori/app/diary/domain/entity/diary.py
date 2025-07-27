@@ -68,4 +68,12 @@ class Diary:
         return diary
 
     def to_model(self):
-        pass
+        diary = Diary(
+            diary_meta_id=self.diary_meta_id,
+            date=self.date,
+            diary_content=self.diary_content,
+            diary_blocks=self.diary_blocks,
+            user_id=self.user_id,
+        )
+
+        return diary
