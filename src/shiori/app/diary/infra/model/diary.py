@@ -54,7 +54,7 @@ class DiaryDocument(Document, MongoTimestampMixin):
 
     class Settings:
         name = "diary"
-        indexes = [[("user_id", 1), ("diary_meta_id", 1)]]
+        indexes = [{"keys": [("user_id", 1), ("diary_meta_id", 1)], "unique": True}]
 
     class Config:
         arbitrary_types_allowed = True
