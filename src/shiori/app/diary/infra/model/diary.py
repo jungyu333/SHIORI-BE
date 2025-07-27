@@ -2,6 +2,7 @@ from typing import Literal, Optional
 
 from beanie import Document
 from pydantic import BaseModel
+from pymongo import IndexModel
 
 from shiori.app.core.database.mixins import MongoTimestampMixin
 
@@ -54,7 +55,13 @@ class DiaryDocument(Document, MongoTimestampMixin):
 
     class Settings:
         name = "diary"
-        indexes = [{"keys": [("user_id", 1), ("diary_meta_id", 1)], "unique": True}]
+        indexes = [
+            IndexModel(
+                [("user_id", 1), ("diary_meta_id", 1)],
+                unique=True,
+                name="idx_user_meta",
+            )
+        ]
 
     class Config:
         arbitrary_types_allowed = True

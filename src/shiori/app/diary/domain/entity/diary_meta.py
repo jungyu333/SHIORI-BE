@@ -1,15 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
 from typing import Optional
 
-from shiori.app.diary.infra.model import DiaryMeta as DiaryMeta_Model
-
-
-class SummaryStatus(str, Enum):
-    pending = "pending"
-    completed = "completed"
-    failed = "failed"
+from shiori.app.diary.infra.model import DiaryMeta as DiaryMeta_Model, SummaryStatus
 
 
 @dataclass

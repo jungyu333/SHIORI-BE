@@ -1,10 +1,17 @@
+from enum import Enum as PyEnum
+
 from sqlalchemy import Integer, ForeignKey, String, Enum, Boolean, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from shiori.app.core.database.mixins import TimestampMixin
 from shiori.app.core.database.session import Base
-from shiori.app.diary.domain.entity import SummaryStatus
 from shiori.app.user.infra.model.user import User
+
+
+class SummaryStatus(str, PyEnum):
+    pending = "pending"
+    completed = "completed"
+    failed = "failed"
 
 
 class DiaryMeta(Base, TimestampMixin):
@@ -20,7 +27,9 @@ class DiaryMeta(Base, TimestampMixin):
     date: Mapped[str] = mapped_column(String(30), nullable=False)
     title: Mapped[str] = mapped_column(String(255), default="")
     summary_status: Mapped[SummaryStatus] = mapped_column(
-        Enum(SummaryStatus), default=SummaryStatus.pending
+        Enum(SummaryStatus, name="summarystatus"),
+        default=SummaryStatus.pending,
+        nullable=False,
     )
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False)
 
