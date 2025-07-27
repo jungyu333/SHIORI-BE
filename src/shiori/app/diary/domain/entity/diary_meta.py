@@ -3,6 +3,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
+from shiori.app.diary.infra.model import DiaryMeta as DiaryMeta_Model
+
 
 class SummaryStatus(str, Enum):
     pending = "pending"
@@ -12,12 +14,12 @@ class SummaryStatus(str, Enum):
 
 @dataclass
 class DiaryMeta:
-    id: int
     user_id: int
     date: str
     title: str = ""
     summary_status: SummaryStatus = SummaryStatus.pending
     is_archived: bool = False
+    id: Optional[int] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -47,5 +49,12 @@ class DiaryMeta:
         )
         return diary_meta
 
-    def to_model(self):
-        pass
+    def to_model(self) -> DiaryMeta_Model:
+        diary_mate = DiaryMeta_Model(
+            user_id=self.user_id,
+            date=self.date,
+            title=self.title,
+            summary_status=self.summary_status,
+            is_archived=self.is_archived,
+        )
+        return diary_mate
