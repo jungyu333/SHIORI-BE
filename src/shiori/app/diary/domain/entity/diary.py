@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from shiori.app.diary.domain.entity import DiaryBlockVO
 from shiori.app.diary.infra.model import DiaryDocument, ProseMirror
+from .diary_block import DiaryBlock as DiaryBlockVO
 
 
 @dataclass

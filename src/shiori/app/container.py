@@ -3,6 +3,11 @@ from dependency_injector.providers import Factory
 
 from shiori.app.auth.application.service import JwtService
 from shiori.app.auth.application.usecase import RefreshUseCase, VerifyTokenUseCase
+from shiori.app.diary.application.service import DiaryService
+from shiori.app.diary.infra.repository import (
+    DiaryRepositoryImpl,
+    DiaryMetaRepositoryImpl,
+)
 from shiori.app.user.application.service import UserService
 from shiori.app.user.application.usecase import (
     CreateUserUseCase,
@@ -13,17 +18,33 @@ from shiori.app.user.infra.repository.user import UserRepositoryImpl
 
 
 class Container(DeclarativeContainer):
-    wiring_config = WiringConfiguration(packages=["shiori.app.user", "shiori.app.auth"])
+    wiring_config = WiringConfiguration(
+        packages=["shiori.app.user", "shiori.app.auth", "shiori.app.diary"]
+    )
 
-    jwt_service = Factory(JwtService)
+    """ Repository """
 
-    """repository"""
+    """ User """
     user_repository = Factory(UserRepositoryImpl)
 
-    """ service """
+    """ Diary """
+    diary_repository = Factory(DiaryRepositoryImpl)
+    diary_meta_repository = Factory(DiaryMetaRepositoryImpl)
+
+    """ Service """
+
+    """ Auth """
+    jwt_service = Factory(JwtService)
+
+    """ User """
     user_service = Factory(UserService, user_repo=user_repository)
 
-    """ usecase """
+    """ Diary """
+    diary_service = Factory(
+        DiaryService, diary_repo=diary_repository, diary_meta_repo=diary_meta_repository
+    )
+
+    """ Usecase """
 
     """ User """
     create_user = Factory(CreateUserUseCase, user_service=user_service)
@@ -31,3 +52,5 @@ class Container(DeclarativeContainer):
     logout_user = Factory(LogoutUserUseCase, user_service=user_service)
     refresh = Factory(RefreshUseCase, jwt_service=jwt_service)
     verify_token = Factory(VerifyTokenUseCase, jwt_service=jwt_service)
+
+    """ Diary """
