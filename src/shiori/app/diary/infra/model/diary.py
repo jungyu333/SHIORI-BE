@@ -33,25 +33,12 @@ class ProseMirror(BaseModel):
     content: list[ContentNode]
 
 
-class DiaryBlock(BaseModel):
-    order: int
-    type: Literal["paragraph", "heading", "quote", "todo", "divider"]
-    content: Optional[str] = None
-    level: Optional[int] = None
-    textAlign: Optional[Literal["left", "center", "right"]] = None
-    marks: Optional[list[Literal["bold", "italic", "strike"]]] = None
-    is_in_quote: Optional[bool] = None
-    parent_type: Optional[str] = None
-    token_length: Optional[int] = None
-    checked: Optional[bool] = None
-
-
 class DiaryDocument(Document, MongoTimestampMixin):
     user_id: int
     diary_meta_id: int
     date: str
     diary_content: ProseMirror
-    diary_blocks: list[DiaryBlock]
+    diary_blocks: list[dict]
 
     class Settings:
         name = "diary"
