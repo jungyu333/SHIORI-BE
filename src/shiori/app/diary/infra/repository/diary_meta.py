@@ -8,7 +8,7 @@ from shiori.app.diary.infra.model import DiaryMeta
 
 class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
-    async def save_diary_meta(self, diary_meta: DiaryMetaVO) -> None:
+    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> None:
 
         diary_meta_model = diary_meta.to_model()
 

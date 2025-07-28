@@ -5,7 +5,7 @@ from shiori.app.diary.infra.model import DiaryDocument
 
 
 class DiaryRepositoryImpl(DiaryRepository):
-    async def save_diary(self, diary: DiaryVO) -> str:
+    async def save_diary(self, *, diary: DiaryVO) -> str:
 
         session = get_mongo_session()
 
