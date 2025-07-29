@@ -14,6 +14,7 @@ class DiaryService:
     @MongoTransactional()
     async def save_diary(
         self,
+        *,
         user_id: int,
         diary_meta_id: int,
         date: str,
