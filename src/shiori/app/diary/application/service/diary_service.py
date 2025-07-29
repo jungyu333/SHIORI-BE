@@ -1,7 +1,7 @@
-from shiori.app.core.database import MongoTransactional
-from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO
+from shiori.app.core.database import MongoTransactional, Transactional
+from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
-from shiori.app.diary.infra.model import ProseMirror
+from shiori.app.diary.infra.model import ProseMirror, SummaryStatus
 
 
 class DiaryService:
@@ -34,3 +34,14 @@ class DiaryService:
         diary_document_id = await self._diary_repo.save_diary(diary=diary)
 
         return diary_document_id
+
+    @Transactional()
+    async def save_diary_meta(
+        self, *, user_id: int, date: str, title: str, summary_status: SummaryStatus
+    ) -> None:
+
+        diary_meta_vo = DiaryMetaVO(
+            user_id=user_id, date=date, title=title, summary_status=summary_status
+        )
+
+        await self._diary_meta_repo.save_diary_meta(diary_meta_vo)
