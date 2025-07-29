@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock
 
 import pytest
+from pymongo.errors import PyMongoError
 
 from shiori.app.diary.application.service import DiaryService
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
@@ -47,3 +48,35 @@ async def test_save_diary():
     # Then
     assert diary_id is not None
     assert isinstance(diary_id, str)
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
+async def test_save_diary_raises_exception():
+    # Given
+    user_id = 1
+    diary_meta_id = 123
+    date = "20250728"
+
+    diary_content_dict = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [
+                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
+                ],
+            }
+        ],
+    }
+
+    content = ProseMirror(**diary_content_dict)
+
+    diary_repository_mock.save_diary.side_effect = PyMongoError("DB error")
+
+    # When Then
+    with pytest.raises(PyMongoError):
+        await diary_service.save_diary(
+            user_id=user_id, diary_meta_id=diary_meta_id, content=content, date=date
+        )
