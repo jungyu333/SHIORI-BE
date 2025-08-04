@@ -124,8 +124,8 @@ async def test_save_diary_meta_invalid_date_format():
             title=title,
         )
 
-    assert str(e.value.message) == "잘못된 날짜 형식 입니다."
-    assert e.value.code == 400
+    assert str(e.value.message) == "잘못된 날짜 형식이에요."
+    assert e.value.code == 422
 
 
 @pytest.mark.asyncio

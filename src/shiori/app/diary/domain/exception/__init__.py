@@ -2,8 +2,8 @@ from shiori.app.core.exceptions import BaseCustomException
 
 
 class NotValidDateFormat(BaseCustomException):
-    def __init__(self, message: str = "잘못된 날짜 형식 입니다.", data: None = None):
-        super().__init__(code=400, message=message, data=data)
+    def __init__(self, message: str = "잘못된 날짜 형식이에요.", data: None = None):
+        super().__init__(code=422, message=message, data=data)
 
 
 class NotValidTitle(BaseCustomException):
