@@ -4,7 +4,7 @@ import pytest
 from pymongo.errors import PyMongoError
 
 from shiori.app.diary.application.service import DiaryService
-from shiori.app.diary.domain.exception import NotValidDateFormat
+from shiori.app.diary.domain.exception import NotValidDateFormat, NotValidTitle
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
 from shiori.app.diary.infra.model import ProseMirror
 
@@ -125,4 +125,26 @@ async def test_save_diary_meta_invalid_date_format():
         )
 
     assert str(e.value.message) == "잘못된 날짜 형식 입니다."
+    assert e.value.code == 400
+
+
+@pytest.mark.asyncio
+async def test_save_diary_meta_invalid_title():
+    # Given
+    user_id = 1
+    date = "20250728"
+    title = "a" * 51
+
+    diary_meta_repository_mock.save_diary_meta.return_value = None
+
+    # When, Then
+
+    with pytest.raises(NotValidTitle) as e:
+        await diary_service.save_diary_meta(
+            user_id=user_id,
+            date=date,
+            title=title,
+        )
+
+    assert str(e.value.message) == "일지 제목은 50자 이내로 작성 해 주세요."
     assert e.value.code == 400
