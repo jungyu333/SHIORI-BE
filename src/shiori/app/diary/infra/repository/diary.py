@@ -5,7 +5,7 @@ from shiori.app.diary.infra.model import DiaryDocument
 
 
 class DiaryRepositoryImpl(DiaryRepository):
-    async def save_diary(self, *, diary: DiaryVO) -> str:
+    async def save_diary(self, *, diary: DiaryVO) -> tuple[str, bool]:
 
         session = get_mongo_session()
 
@@ -20,7 +20,7 @@ class DiaryRepositoryImpl(DiaryRepository):
         if existed_document:
             diary_document.id = existed_document.id
             await diary_document.replace(session=session)
+            return str(diary_document.id), False
         else:
             await diary_document.insert(session=session)
-
-        return str(diary_document.id)
+            return str(diary_document.id), True

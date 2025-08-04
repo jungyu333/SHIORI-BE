@@ -6,5 +6,5 @@ from shiori.app.diary.domain.entity import DiaryVO
 class DiaryRepository(ABC):
 
     @abstractmethod
-    async def save_diary(self, *, diary: DiaryVO) -> str:
+    async def save_diary(self, *, diary: DiaryVO) -> tuple[str, bool]:
         pass
