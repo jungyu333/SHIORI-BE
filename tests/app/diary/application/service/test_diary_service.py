@@ -38,11 +38,11 @@ async def test_save_diary():
 
     content = ProseMirror(**diary_content_dict)
 
-    diary_repository_mock.save_diary.return_value = "mock_diary_id"
+    diary_repository_mock.save_diary.return_value = "mock_diary_id", True
 
     # When
 
-    diary_id = await diary_service.save_diary(
+    diary_id, is_created = await diary_service.save_diary(
         user_id=user_id, diary_meta_id=diary_meta_id, content=content, date=date
     )
 

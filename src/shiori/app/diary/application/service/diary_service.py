@@ -1,3 +1,5 @@
+from typing import Optional
+
 from shiori.app.core.database import MongoTransactional, Transactional
 from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
@@ -20,7 +22,7 @@ class DiaryService:
         diary_meta_id: int,
         date: str,
         content: ProseMirror,
-    ) -> str:
+    ) -> tuple[str, bool]:
 
         diary_blocks = DiaryBlockVO.from_prosemirror(content.model_dump())
 
@@ -32,12 +34,14 @@ class DiaryService:
             diary_blocks=diary_blocks,
         )
 
-        diary_document_id = await self._diary_repo.save_diary(diary=diary)
+        diary_document_id, is_created = await self._diary_repo.save_diary(diary=diary)
 
-        return diary_document_id
+        return diary_document_id, is_created
 
     @Transactional()
-    async def save_diary_meta(self, *, user_id: int, date: str, title: str) -> None:
+    async def save_diary_meta(
+        self, *, user_id: int, date: str, title: str
+    ) -> int | None:
 
         DiaryMetaValidator.validate_date_format(date)
         DiaryMetaValidator.validate_title(title)
@@ -48,4 +52,31 @@ class DiaryService:
             title=title,
         )
 
-        await self._diary_meta_repo.save_diary_meta(diary_meta_vo)
+        diary_meta_id = await self._diary_meta_repo.save_diary_meta(diary_meta_vo)
+
+        return diary_meta_id
+
+    async def upsert_diary(
+        self,
+        *,
+        user_id: int,
+        date: str,
+        content: ProseMirror,
+        title: Optional[str] = "",
+    ) -> tuple[str, bool] | None:
+
+        diary_meta_id = await self.save_diary_meta(
+            user_id=user_id, date=date, title=title
+        )
+
+        if diary_meta_id:
+            diary_id, is_created = await self.save_diary(
+                user_id=user_id,
+                diary_meta_id=diary_meta_id,
+                date=date,
+                content=content,
+            )
+
+            return diary_id, is_created
+
+        return None
