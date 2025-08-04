@@ -8,16 +8,30 @@ from shiori.app.diary.domain.exception import NotValidDateFormat, NotValidTitle
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
 from shiori.app.diary.infra.model import ProseMirror
 
-diary_repository_mock = AsyncMock(spec=DiaryRepository)
-diary_meta_repository_mock = AsyncMock(spec=DiaryMetaRepository)
-diary_service = DiaryService(
-    diary_repo=diary_repository_mock, diary_meta_repo=diary_meta_repository_mock
-)
+
+@pytest.fixture
+def diary_repository_mock():
+    return AsyncMock(spec=DiaryRepository)
+
+
+@pytest.fixture
+def diary_meta_repository_mock():
+    return AsyncMock(spec=DiaryMetaRepository)
+
+
+@pytest.fixture
+def diary_service(diary_repository_mock, diary_meta_repository_mock):
+    return DiaryService(
+        diary_repo=diary_repository_mock,
+        diary_meta_repo=diary_meta_repository_mock,
+    )
 
 
 @pytest.mark.asyncio
 @pytest.mark.mongo
-async def test_save_diary():
+async def test_save_diary(
+    diary_repository_mock, diary_meta_repository_mock, diary_service
+):
     # Given
     user_id = 1
     diary_meta_id = 123
@@ -53,7 +67,9 @@ async def test_save_diary():
 
 @pytest.mark.asyncio
 @pytest.mark.mongo
-async def test_save_diary_raises_exception():
+async def test_save_diary_raises_exception(
+    diary_repository_mock, diary_meta_repository_mock, diary_service
+):
     # Given
     user_id = 1
     diary_meta_id = 123
@@ -84,7 +100,9 @@ async def test_save_diary_raises_exception():
 
 
 @pytest.mark.asyncio
-async def test_save_diary_meta():
+async def test_save_diary_meta(
+    diary_repository_mock, diary_meta_repository_mock, diary_service
+):
     # Given
     user_id = 1
     date = "20250728"
@@ -107,7 +125,9 @@ async def test_save_diary_meta():
 
 
 @pytest.mark.asyncio
-async def test_save_diary_meta_invalid_date_format():
+async def test_save_diary_meta_invalid_date_format(
+    diary_repository_mock, diary_meta_repository_mock, diary_service
+):
     # Given
     user_id = 1
     date = "2025-07-28"
@@ -129,7 +149,9 @@ async def test_save_diary_meta_invalid_date_format():
 
 
 @pytest.mark.asyncio
-async def test_save_diary_meta_invalid_title():
+async def test_save_diary_meta_invalid_title(
+    diary_repository_mock, diary_meta_repository_mock, diary_service
+):
     # Given
     user_id = 1
     date = "20250728"
@@ -148,3 +170,48 @@ async def test_save_diary_meta_invalid_title():
 
     assert str(e.value.message) == "일지 제목은 50자 이내로 작성 해 주세요."
     assert e.value.code == 400
+
+
+@pytest.mark.asyncio
+async def test_upsert_diary(
+    diary_repository_mock, diary_meta_repository_mock, diary_service
+):
+    # Given
+
+    user_id = 1
+    date = "20250728"
+    title = "dummy_title"
+
+    diary_content_dict = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [
+                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
+                ],
+            }
+        ],
+    }
+
+    content = ProseMirror(**diary_content_dict)
+
+    diary_repository_mock.save_diary.return_value = "mock_diary_id", True
+    diary_meta_repository_mock.save_diary_meta.return_value = "mock_diary_meta_id"
+
+    # When
+
+    diary_id, is_created = await diary_service.upsert_diary(
+        user_id=user_id,
+        date=date,
+        content=content,
+        title=title,
+    )
+
+    # Then
+
+    assert diary_repository_mock.save_diary.call_count == 1
+    assert diary_meta_repository_mock.save_diary_meta.call_count == 1
+    assert diary_id == "mock_diary_id"
+    assert is_created
