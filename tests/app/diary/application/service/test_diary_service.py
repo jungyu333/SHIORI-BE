@@ -215,3 +215,46 @@ async def test_upsert_diary(
     assert diary_meta_repository_mock.save_diary_meta.call_count == 1
     assert diary_id == "mock_diary_id"
     assert is_created
+
+
+@pytest.mark.asyncio
+async def test_upsert_diary_raises_save_diary_meta(
+    diary_repository_mock, diary_meta_repository_mock, diary_service
+):
+    # Given
+    user_id = 1
+    date = "20250728"
+    title = "dummy_title"
+
+    diary_content_dict = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [
+                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
+                ],
+            }
+        ],
+    }
+
+    content = ProseMirror(**diary_content_dict)
+
+    diary_repository_mock.save_diary.return_value = "mock_diary_id", True
+    diary_meta_repository_mock.save_diary_meta.return_value = None
+
+    # When
+
+    response = await diary_service.upsert_diary(
+        user_id=user_id,
+        date=date,
+        content=content,
+        title=title,
+    )
+
+    # Then
+
+    assert diary_repository_mock.save_diary.call_count == 0
+    assert diary_meta_repository_mock.save_diary_meta.call_count == 1
+    assert response is None
