@@ -8,7 +8,7 @@ from shiori.app.diary.infra.model import DiaryMeta
 
 class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
-    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> None:
+    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> int | None:
 
         diary_meta_model = diary_meta.to_model()
 
@@ -17,8 +17,10 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
         existing_diary_meta = await session.execute(stmt).scalar().first()
 
         if existing_diary_meta:
-            return
+            return None
 
         session.add(diary_meta_model)
 
         await session.flush()
+
+        return diary_meta_model.id
