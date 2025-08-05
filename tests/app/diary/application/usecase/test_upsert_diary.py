@@ -18,7 +18,6 @@ async def test_execute(diary_service_mock):
     # Given
 
     user_id = 1
-    diary_meta_id = "123"
     date = "20250728"
     title = "dummy_title"
 
@@ -51,3 +50,6 @@ async def test_execute(diary_service_mock):
 
     assert is_created
     assert diary_id is not None
+    diary_service_mock.upsert_diary.assert_awaited_with(
+        user_id=user_id, date=date, content=content, title=title
+    )
