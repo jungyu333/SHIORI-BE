@@ -62,7 +62,7 @@ class DiaryService:
         date: str,
         content: ProseMirror,
         title: Optional[str] = "",
-    ) -> tuple[str, bool] | None:
+    ) -> tuple[str | None, bool | None]:
 
         diary_meta_id = await self.save_diary_meta(
             user_id=user_id, date=date, title=title
@@ -78,4 +78,4 @@ class DiaryService:
 
             return diary_id, is_created
 
-        return None
+        return None, None
