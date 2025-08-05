@@ -1,6 +1,6 @@
 from typing import Optional
 
-from shiori.app.core.database import MongoTransactional, Transactional
+from shiori.app.core.database import MongoTransactional
 from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
 from shiori.app.diary.domain.validator import DiaryMetaValidator
@@ -14,7 +14,6 @@ class DiaryService:
         self._diary_repo = diary_repo
         self._diary_meta_repo = diary_meta_repo
 
-    @MongoTransactional()
     async def save_diary(
         self,
         *,
@@ -38,7 +37,6 @@ class DiaryService:
 
         return diary_document_id, is_created
 
-    @Transactional()
     async def save_diary_meta(
         self, *, user_id: int, date: str, title: str
     ) -> str | None:
@@ -56,6 +54,7 @@ class DiaryService:
 
         return diary_meta_id
 
+    @MongoTransactional()
     async def upsert_diary(
         self,
         *,
