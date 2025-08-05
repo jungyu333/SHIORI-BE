@@ -34,7 +34,7 @@ async def test_save_diary(
 ):
     # Given
     user_id = 1
-    diary_meta_id = 123
+    diary_meta_id = "123"
     date = "20250728"
 
     diary_content_dict = {
@@ -72,7 +72,7 @@ async def test_save_diary_raises_exception(
 ):
     # Given
     user_id = 1
-    diary_meta_id = 123
+    diary_meta_id = "123"
     date = "20250728"
 
     diary_content_dict = {
@@ -100,6 +100,7 @@ async def test_save_diary_raises_exception(
 
 
 @pytest.mark.asyncio
+@pytest.mark.mongo
 async def test_save_diary_meta(
     diary_repository_mock, diary_meta_repository_mock, diary_service
 ):
@@ -125,6 +126,7 @@ async def test_save_diary_meta(
 
 
 @pytest.mark.asyncio
+@pytest.mark.mongo
 async def test_save_diary_meta_invalid_date_format(
     diary_repository_mock, diary_meta_repository_mock, diary_service
 ):
@@ -149,6 +151,7 @@ async def test_save_diary_meta_invalid_date_format(
 
 
 @pytest.mark.asyncio
+@pytest.mark.mongo
 async def test_save_diary_meta_invalid_title(
     diary_repository_mock, diary_meta_repository_mock, diary_service
 ):
@@ -173,6 +176,7 @@ async def test_save_diary_meta_invalid_title(
 
 
 @pytest.mark.asyncio
+@pytest.mark.mongo
 async def test_upsert_diary(
     diary_repository_mock, diary_meta_repository_mock, diary_service
 ):
@@ -218,6 +222,7 @@ async def test_upsert_diary(
 
 
 @pytest.mark.asyncio
+@pytest.mark.mongo
 async def test_upsert_diary_raises_save_diary_meta(
     diary_repository_mock, diary_meta_repository_mock, diary_service
 ):
@@ -261,6 +266,7 @@ async def test_upsert_diary_raises_save_diary_meta(
 
 
 @pytest.mark.asyncio
+@pytest.mark.mongo
 async def test_upsert_diary_invalid_date_format(
     diary_repository_mock, diary_meta_repository_mock, diary_service
 ):
