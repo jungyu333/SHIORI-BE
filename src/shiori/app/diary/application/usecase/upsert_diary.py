@@ -5,7 +5,7 @@ from shiori.app.diary.infra.model import ProseMirror
 
 
 class UpsertDiary:
-    def __init__(self, diary_service: DiaryService):
+    def __init__(self, *, diary_service: DiaryService):
         self._diary_service = diary_service
 
     async def execute(

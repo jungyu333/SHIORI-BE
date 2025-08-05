@@ -251,7 +251,7 @@ async def test_upsert_diary_raises_save_diary_meta(
 
     # When
 
-    response = await diary_service.upsert_diary(
+    diary_id, is_created = await diary_service.upsert_diary(
         user_id=user_id,
         date=date,
         content=content,
@@ -262,7 +262,8 @@ async def test_upsert_diary_raises_save_diary_meta(
 
     assert diary_repository_mock.save_diary.call_count == 0
     assert diary_meta_repository_mock.save_diary_meta.call_count == 1
-    assert response is None
+    assert diary_id is None
+    assert is_created is None
 
 
 @pytest.mark.asyncio
