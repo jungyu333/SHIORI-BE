@@ -19,7 +19,7 @@ class DiaryService:
         self,
         *,
         user_id: int,
-        diary_meta_id: int,
+        diary_meta_id: str,
         date: str,
         content: ProseMirror,
     ) -> tuple[str, bool]:
@@ -41,7 +41,7 @@ class DiaryService:
     @Transactional()
     async def save_diary_meta(
         self, *, user_id: int, date: str, title: str
-    ) -> int | None:
+    ) -> str | None:
 
         DiaryMetaValidator.validate_date_format(date)
         DiaryMetaValidator.validate_title(title)

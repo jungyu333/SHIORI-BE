@@ -9,7 +9,7 @@ from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.client_session import ClientSession
 
 from shiori.app.core import get_settings
-from shiori.app.diary.infra.model import DiaryDocument
+from shiori.app.diary.infra.model import DiaryDocument, DiaryMetaDocument
 
 config = get_settings()
 
@@ -35,7 +35,9 @@ def reset_mongo_session() -> None:
 
 
 async def init_mongo() -> None:
-    await init_beanie(database=mongo_db, document_models=[DiaryDocument])
+    await init_beanie(
+        database=mongo_db, document_models=[DiaryDocument, DiaryMetaDocument]
+    )
 
 
 @asynccontextmanager

@@ -1,26 +1,25 @@
-from sqlalchemy import select
-
-from shiori.app.core.database import session
+from shiori.app.core.database.mongo_session import get_mongo_session
 from shiori.app.diary.domain.entity import DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryMetaRepository
-from shiori.app.diary.infra.model import DiaryMeta
+from shiori.app.diary.infra.model import DiaryMetaDocument
 
 
 class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
-    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> int:
+    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> str:
 
-        diary_meta_model = diary_meta.to_model()
+        session = get_mongo_session()
 
-        stmt = select(DiaryMeta).where(DiaryMeta.id == diary_meta_model.id)
+        existing_meta = await DiaryMetaDocument.find_one(
+            DiaryMetaDocument.user_id == diary_meta.user_id,
+            DiaryMetaDocument.date == diary_meta.date,
+            session=session,
+        )
 
-        existing_diary_meta = await session.execute(stmt).scalar().first()
+        if existing_meta:
+            return str(existing_meta.id)
 
-        if existing_diary_meta:
-            return existing_diary_meta.id
+        diary_meta_document = diary_meta.to_model()
 
-        session.add(diary_meta_model)
-
-        await session.flush()
-
-        return diary_meta_model.id
+        await diary_meta_document.insert()
+        return str(diary_meta_document.id)

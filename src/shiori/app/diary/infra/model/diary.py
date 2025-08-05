@@ -1,6 +1,7 @@
 from typing import Literal, Optional
 
 from beanie import Document
+from bson import ObjectId
 from pydantic import BaseModel
 from pymongo import IndexModel
 
@@ -35,7 +36,7 @@ class ProseMirror(BaseModel):
 
 class DiaryDocument(Document, MongoTimestampMixin):
     user_id: int
-    diary_meta_id: int
+    diary_meta_id: ObjectId
     date: str
     diary_content: ProseMirror
     diary_blocks: list[dict]

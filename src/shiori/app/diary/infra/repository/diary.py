@@ -1,3 +1,5 @@
+from bson import ObjectId
+
 from shiori.app.core.database.mongo_session import get_mongo_session
 from shiori.app.diary.domain.entity import DiaryVO
 from shiori.app.diary.domain.repository import DiaryRepository
@@ -15,7 +17,13 @@ class DiaryRepositoryImpl(DiaryRepository):
             session=session,
         )
 
-        diary_document = diary.to_model()
+        diary_document = DiaryDocument(
+            diary_meta_id=ObjectId(diary.diary_meta_id),
+            date=diary.date,
+            diary_content=diary.diary_content,
+            diary_blocks=[block.to_dict() for block in diary.diary_blocks],
+            user_id=diary.user_id,
+        )
 
         if existed_document:
             diary_document.id = existed_document.id
