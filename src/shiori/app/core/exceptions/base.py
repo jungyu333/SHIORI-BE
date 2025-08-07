@@ -1,7 +1,7 @@
 class BaseCustomException(Exception):
     def __init__(self, code: int = 400, message: str = "", data=None):
         if data is None:
-            data = {}
+            data = None
 
         self.code = code
         self.message = message
