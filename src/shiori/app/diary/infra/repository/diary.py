@@ -13,7 +13,7 @@ class DiaryRepositoryImpl(DiaryRepository):
 
         existed_document = await DiaryDocument.find_one(
             DiaryDocument.user_id == diary.user_id,
-            DiaryDocument.diary_meta_id == diary.diary_meta_id,
+            DiaryDocument.diary_meta_id == ObjectId(diary.diary_meta_id),
             session=session,
         )
 
