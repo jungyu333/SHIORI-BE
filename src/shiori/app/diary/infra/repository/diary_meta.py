@@ -21,5 +21,5 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
         diary_meta_document = diary_meta.to_model()
 
-        await diary_meta_document.insert()
+        await diary_meta_document.insert(session=session)
         return str(diary_meta_document.id)

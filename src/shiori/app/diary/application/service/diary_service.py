@@ -50,7 +50,9 @@ class DiaryService:
             title=title,
         )
 
-        diary_meta_id = await self._diary_meta_repo.save_diary_meta(diary_meta_vo)
+        diary_meta_id = await self._diary_meta_repo.save_diary_meta(
+            diary_meta=diary_meta_vo
+        )
 
         return diary_meta_id
 
