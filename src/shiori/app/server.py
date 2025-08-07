@@ -21,12 +21,14 @@ from shiori.app.core.middleware import (
     ResponseLogMiddleware,
     SQLAlchemyMiddleware,
 )
+from shiori.app.diary.interface.router import diary_router
 from shiori.app.user.interface.router import user_router
 
 
 def init_router(app_: FastAPI) -> None:
     app_.include_router(user_router, prefix="/api/user", tags=["User"])
     app_.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
+    app_.include_router(diary_router, prefix="/api/diary", tags=["Diary"])
 
 
 def init_listener(app_: FastAPI) -> None:

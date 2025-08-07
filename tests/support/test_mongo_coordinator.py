@@ -2,6 +2,8 @@ from beanie import init_beanie
 from pymongo import MongoClient
 
 from shiori.app.core import get_settings
+from shiori.app.core.database import mongo_client
+from shiori.app.diary.infra.model import DiaryDocument, DiaryMetaDocument
 
 config = get_settings()
 
@@ -32,7 +34,6 @@ class TestMongoCoordinator:
 
     async def init_beanie_odm(self) -> None:
 
-        from pymongo import AsyncMongoClient
-        client = AsyncMongoClient(config.MONGO_DB_URL)
-        async_db = client[config.MONGO_DB_NAME]
-        await init_beanie(database=async_db, document_models=[])
+        async_db = mongo_client[config.MONGO_DB_NAME]
+
+        await init_beanie(database=async_db, document_models=[DiaryDocument, DiaryMetaDocument])

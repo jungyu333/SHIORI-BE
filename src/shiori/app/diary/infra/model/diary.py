@@ -1,7 +1,9 @@
 from typing import Literal, Optional
 
 from beanie import Document
+from bson import ObjectId
 from pydantic import BaseModel
+from pymongo import IndexModel
 
 from shiori.app.core.database.mixins import MongoTimestampMixin
 
@@ -32,29 +34,22 @@ class ProseMirror(BaseModel):
     content: list[ContentNode]
 
 
-class DiaryBlock(BaseModel):
-    order: int
-    type: Literal["paragraph", "heading", "quote", "todo", "divider"]
-    content: Optional[str] = None
-    level: Optional[int] = None
-    textAlign: Optional[Literal["left", "center", "right"]] = None
-    marks: Optional[list[Literal["bold", "italic", "strike"]]] = None
-    is_in_quote: Optional[bool] = None
-    parent_type: Optional[str] = None
-    token_length: Optional[int] = None
-    checked: Optional[bool] = None
-
-
 class DiaryDocument(Document, MongoTimestampMixin):
     user_id: int
-    diary_meta_id: int
+    diary_meta_id: ObjectId
     date: str
     diary_content: ProseMirror
-    diary_blocks: list[DiaryBlock]
+    diary_blocks: list[dict]
 
     class Settings:
         name = "diary"
-        indexes = [[("user_id", 1), ("diary_meta_id", 1)]]
+        indexes = [
+            IndexModel(
+                [("user_id", 1), ("diary_meta_id", 1)],
+                unique=True,
+                name="idx_user_meta",
+            )
+        ]
 
     class Config:
         arbitrary_types_allowed = True

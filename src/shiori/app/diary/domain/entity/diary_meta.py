@@ -1,23 +1,18 @@
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
 from typing import Optional
 
-
-class SummaryStatus(str, Enum):
-    pending = "pending"
-    completed = "completed"
-    failed = "failed"
+from shiori.app.diary.infra.model import SummaryStatus, DiaryMetaDocument
 
 
 @dataclass
 class DiaryMeta:
-    id: int
     user_id: int
     date: str
     title: str = ""
     summary_status: SummaryStatus = SummaryStatus.pending
     is_archived: bool = False
+    id: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -36,7 +31,7 @@ class DiaryMeta:
     @classmethod
     def from_model(cls, model) -> "DiaryMeta":
         diary_meta = DiaryMeta(
-            id=model.id,
+            id=str(model.id),
             user_id=model.user_id,
             date=model.date,
             title=model.title,
@@ -47,5 +42,12 @@ class DiaryMeta:
         )
         return diary_meta
 
-    def to_model(self):
-        pass
+    def to_model(self) -> DiaryMetaDocument:
+        diary_mate = DiaryMetaDocument(
+            user_id=self.user_id,
+            date=self.date,
+            title=self.title,
+            summary_status=self.summary_status,
+            is_archived=self.is_archived,
+        )
+        return diary_mate

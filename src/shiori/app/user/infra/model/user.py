@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from shiori.app.core.database.mixins import TimestampMixin
 from shiori.app.core.database.session import Base
@@ -13,11 +13,6 @@ class User(Base, TimestampMixin):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     nickname: Mapped[str] = mapped_column(String(30), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-
-    diary_meta_list: Mapped[list["DiaryMeta"]] = relationship(
-        back_populates="user",
-        cascade="all, delete-orphan",
-    )
 
     def __repr__(self):
         return f"<User(id={self.id}, nickname='{self.nickname}', email='{self.email}')>"

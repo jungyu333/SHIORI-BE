@@ -22,7 +22,8 @@ class TestDbCoordinator:
         tables = self._get_all_tables(engine=engine)
         for table in tables:
             with engine.begin() as connection:
-                connection.execute(text(f"TRUNCATE TABLE {table}"))
+                connection.execute(text(f"DELETE FROM `{table}`"))
+                connection.execute(text(f"ALTER TABLE `{table}` AUTO_INCREMENT = 1"))
 
     def _get_all_tables(self, *, engine: Engine) -> list[str]:
         inspector = inspect(engine)

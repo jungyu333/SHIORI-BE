@@ -10,19 +10,19 @@ from shiori.app.core.database import (
 
 
 class MongoTransactional:
-    def __init__(self, *, session: str = "session"):
-        self.session = session
-
     def __call__(self, func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            async with await mongo_client.start_session() as session:
+
+            async with mongo_client.start_session() as session:
                 set_mongo_session(session)
                 try:
-                    async with session.start_transaction():
-                        kwargs[self.session] = session
-                        return await func(*args, **kwargs)
+                    await session.start_transaction()
+                    result = await func(*args, **kwargs)
+                    await session.commit_transaction()
+                    return result
                 except PyMongoError as e:
+                    await session.abort_transaction()
                     raise e
                 finally:
                     reset_mongo_session()

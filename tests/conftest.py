@@ -47,7 +47,7 @@ async def init_beanie_once():
     await test_mongo_coordinator.init_beanie_odm()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="function", autouse=True)
 def mongo_test_context(request):
     if "mongo" not in request.keywords:
         yield

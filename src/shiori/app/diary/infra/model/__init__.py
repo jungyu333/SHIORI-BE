@@ -1,9 +1,9 @@
-from .diary import DiaryDocument, ProseMirror, DiaryBlock
-from .diary_meta import DiaryMeta
+from .diary import DiaryDocument, ProseMirror
+from .diary_meta import SummaryStatus, DiaryMetaDocument
 
 __all__ = [
     "DiaryDocument",
-    "DiaryBlock",
     "ProseMirror",
-    "DiaryMeta",
+    "SummaryStatus",
+    "DiaryMetaDocument",
 ]
