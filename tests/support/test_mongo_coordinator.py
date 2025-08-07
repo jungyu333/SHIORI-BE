@@ -36,5 +36,4 @@ class TestMongoCoordinator:
 
         async_db = mongo_client[config.MONGO_DB_NAME]
 
-        print(async_db, 'async_db')
         await init_beanie(database=async_db, document_models=[DiaryDocument, DiaryMetaDocument])
