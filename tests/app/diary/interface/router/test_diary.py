@@ -122,7 +122,7 @@ async def test_upsert_diary_invalid_date():
     # Then
     assert response.json().get("code") == 422
     assert response.json().get("message") == "잘못된 날짜 형식이에요."
-    assert response.json().get("data") == None
+    assert response.json().get("data") is None
 
 
 @pytest.mark.mongo
@@ -159,7 +159,7 @@ async def test_get_diary_invalid_date():
     # Then
     assert response.json().get("code") == 422
     assert response.json().get("message") == "잘못된 날짜 형식이에요."
-    assert response.json().get("data") == None
+    assert response.json().get("data") is None
 
 
 @pytest.mark.mongo
