@@ -68,9 +68,7 @@ async def get_diary(
         user_id=user_id,
     )
 
-    response = GetDiaryResponse(
-        content=content,
-    )
+    response = GetDiaryResponse(content=content)
 
     return {
         "code": 200,

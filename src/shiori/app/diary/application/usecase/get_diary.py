@@ -12,4 +12,4 @@ class GetDiary:
             date=date,
         )
 
-        return content
+        return content.model_dump(exclude_none=True) if content else None
