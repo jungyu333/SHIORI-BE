@@ -32,3 +32,19 @@ class DiaryRepositoryImpl(DiaryRepository):
         else:
             await diary_document.insert(session=session)
             return str(diary_document.id), True
+
+    async def get_diary_by_date(self, *, user_id: int, date: str) -> DiaryVO | None:
+
+        session = get_mongo_session()
+
+        existed_document = await DiaryDocument.find_one(
+            DiaryDocument.date == date,
+            DiaryDocument.user_id == user_id,
+            session=session,
+        )
+
+        if existed_document:
+            diary_vo = DiaryVO.from_model(existed_document)
+            return diary_vo
+
+        return None
