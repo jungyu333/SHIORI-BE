@@ -142,3 +142,21 @@ async def test_get_diary():
     assert response.json().get("code") == 200
     assert response.json().get("message") == ""
     assert response.json().get("data").get("content") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+async def test_get_diary_invalid_date():
+    # Given
+    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    date = "2025-07-28"
+
+    # When
+    headers = {"Authorization": f"Bearer {access_token}"}
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.get(f"/api/diary/{date}")
+
+    # Then
+    assert response.json().get("code") == 422
+    assert response.json().get("message") == "잘못된 날짜 형식이에요."
+    assert response.json().get("data") == None
