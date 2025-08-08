@@ -86,9 +86,12 @@ class DiaryService:
 
         DiaryMetaValidator.validate_date_format(date)
 
-        result = await self._diary_repo.get_diary_by_date(
+        diary_vo = await self._diary_repo.get_diary_by_date(
             user_id=user_id,
             date=date,
         )
 
-        return result
+        if diary_vo:
+            return diary_vo.diary_content
+
+        return None
