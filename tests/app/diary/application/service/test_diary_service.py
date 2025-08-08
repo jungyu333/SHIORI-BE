@@ -350,6 +350,26 @@ async def test_get_diary_content(diary_repository_mock, diary_service):
 
 @pytest.mark.asyncio
 @pytest.mark.mongo
+async def test_get_diary_content_none(diary_repository_mock, diary_service):
+    # Given
+    user_id = 1
+    date = "20250728"
+
+    diary_repository_mock.get_diary_by_date.return_value = None
+
+    # When
+
+    result = await diary_service.get_diary_content(
+        user_id=user_id,
+        date=date,
+    )
+
+    # Then
+    assert result is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
 async def test_get_diary_content_invalid_date(diary_repository_mock, diary_service):
     # Given
     user_id = 1
