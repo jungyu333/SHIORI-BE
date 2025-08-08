@@ -6,4 +6,4 @@ class UpsertDiaryResponse(BaseModel):
 
 
 class GetDiaryResponse(BaseModel):
-    content: dict = Field(..., description="Diary Content")
+    content: dict | None = Field(..., description="Diary Content")
