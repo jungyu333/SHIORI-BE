@@ -346,3 +346,42 @@ async def test_get_diary_content(diary_repository_mock, diary_service):
 
     # Then
     assert result == content
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
+async def test_get_diary_content_invalid_date(diary_repository_mock, diary_service):
+    # Given
+    user_id = 1
+    date = "2025-07-28"
+
+    diary_content_dict = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [
+                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
+                ],
+            }
+        ],
+    }
+
+    content = ProseMirror(**diary_content_dict)
+
+    diary_vo_mock = AsyncMock(spec=DiaryVO)
+    diary_vo_mock.diary_content = content
+
+    diary_repository_mock.get_diary_by_date.return_value = diary_vo_mock
+
+    # When, Then
+
+    with pytest.raises(NotValidDateFormat) as e:
+        result = await diary_service.get_diary_content(
+            user_id=user_id,
+            date=date,
+        )
+
+    assert str(e.value.message) == "잘못된 날짜 형식이에요."
+    assert e.value.code == 422
