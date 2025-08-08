@@ -48,7 +48,12 @@ class DiaryDocument(Document, MongoTimestampMixin):
                 [("user_id", 1), ("diary_meta_id", 1)],
                 unique=True,
                 name="idx_user_meta",
-            )
+            ),
+            IndexModel(
+                [("user_id", 1), ("date", 1)],
+                unique=True,
+                name="idx_user_date",
+            ),
         ]
 
     class Config:
