@@ -4,7 +4,7 @@ from dependency_injector.providers import Factory
 from shiori.app.auth.application.service import JwtService
 from shiori.app.auth.application.usecase import RefreshUseCase, VerifyTokenUseCase
 from shiori.app.diary.application.service import DiaryService
-from shiori.app.diary.application.usecase import UpsertDiary
+from shiori.app.diary.application.usecase import UpsertDiary, GetDiary
 from shiori.app.diary.infra.repository import (
     DiaryRepositoryImpl,
     DiaryMetaRepositoryImpl,
@@ -56,3 +56,4 @@ class Container(DeclarativeContainer):
 
     """ Diary """
     upsert_diary = Factory(UpsertDiary, diary_service=diary_service)
+    get_diary = Factory(GetDiary, diary_service=diary_service)

@@ -4,6 +4,7 @@ import pytest
 from pymongo.errors import PyMongoError
 
 from shiori.app.diary.application.service import DiaryService
+from shiori.app.diary.domain.entity import diary as DiaryVO
 from shiori.app.diary.domain.exception import NotValidDateFormat, NotValidTitle
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
 from shiori.app.diary.infra.model import ProseMirror
@@ -307,3 +308,100 @@ async def test_upsert_diary_invalid_date_format(
     assert str(e.value.message) == "잘못된 날짜 형식이에요."
     assert e.value.code == 422
     assert diary_repository_mock.save_diary.call_count == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
+async def test_get_diary_content(diary_repository_mock, diary_service):
+    # Given
+    user_id = 1
+    date = "20250728"
+
+    diary_content_dict = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [
+                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
+                ],
+            }
+        ],
+    }
+
+    content = ProseMirror(**diary_content_dict)
+
+    diary_vo_mock = AsyncMock(spec=DiaryVO)
+    diary_vo_mock.diary_content = content
+
+    diary_repository_mock.get_diary_by_date.return_value = diary_vo_mock
+
+    # When
+
+    result = await diary_service.get_diary_content(
+        user_id=user_id,
+        date=date,
+    )
+
+    # Then
+    assert result == content
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
+async def test_get_diary_content_none(diary_repository_mock, diary_service):
+    # Given
+    user_id = 1
+    date = "20250728"
+
+    diary_repository_mock.get_diary_by_date.return_value = None
+
+    # When
+
+    result = await diary_service.get_diary_content(
+        user_id=user_id,
+        date=date,
+    )
+
+    # Then
+    assert result is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
+async def test_get_diary_content_invalid_date(diary_repository_mock, diary_service):
+    # Given
+    user_id = 1
+    date = "2025-07-28"
+
+    diary_content_dict = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [
+                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
+                ],
+            }
+        ],
+    }
+
+    content = ProseMirror(**diary_content_dict)
+
+    diary_vo_mock = AsyncMock(spec=DiaryVO)
+    diary_vo_mock.diary_content = content
+
+    diary_repository_mock.get_diary_by_date.return_value = diary_vo_mock
+
+    # When, Then
+
+    with pytest.raises(NotValidDateFormat) as e:
+        result = await diary_service.get_diary_content(
+            user_id=user_id,
+            date=date,
+        )
+
+    assert str(e.value.message) == "잘못된 날짜 형식이에요."
+    assert e.value.code == 422

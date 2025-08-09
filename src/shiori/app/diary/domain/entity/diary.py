@@ -21,7 +21,7 @@ class Diary:
     def from_model(cls, model) -> "Diary":
         diary = Diary(
             id=str(model.id),
-            diary_meta_id=str(model.meta_id),
+            diary_meta_id=str(model.diary_meta_id),
             date=model.date,
             diary_content=model.diary_content,
             diary_blocks=[

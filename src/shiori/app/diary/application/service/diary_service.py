@@ -81,3 +81,17 @@ class DiaryService:
             return diary_id, is_created
 
         return None, None
+
+    async def get_diary_content(self, *, user_id: int, date: str) -> ProseMirror | None:
+
+        DiaryMetaValidator.validate_date_format(date)
+
+        diary_vo = await self._diary_repo.get_diary_by_date(
+            user_id=user_id,
+            date=date,
+        )
+
+        if diary_vo:
+            return diary_vo.diary_content
+
+        return None
