@@ -1,15 +1,15 @@
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 
 from beanie import Document
 from bson import ObjectId
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from pymongo import IndexModel
 
 from shiori.app.core.database.mixins import MongoTimestampMixin
 
 
 class Mark(BaseModel):
-    type: Literal["bold", "italic", "strike", "underline"]
+    type: Literal["bold", "italic", "strike", "underline", "code"]
 
 
 class TextNode(BaseModel):
@@ -19,14 +19,20 @@ class TextNode(BaseModel):
 
 
 class NodeAttrs(BaseModel):
-    textAlign: Optional[Literal["left", "center", "right"]] = None
+
+    textAlign: Optional[Literal["left", "center", "right"]] = Field(
+        default=None, alias="text_align"
+    )
     level: Optional[int] = None
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class ContentNode(BaseModel):
     type: str
     attrs: Optional[NodeAttrs] = None
-    content: Optional[list[TextNode]] = None
+
+    content: Optional[list[Union[TextNode, "ContentNode"]]] = None
 
 
 class ProseMirror(BaseModel):
