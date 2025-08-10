@@ -16,10 +16,12 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
             session=session,
         )
 
-        if existing_meta:
-            return str(existing_meta.id)
-
         diary_meta_document = diary_meta.to_model()
+
+        if existing_meta:
+            diary_meta_document.id = existing_meta.id
+            await diary_meta_document.replace(session=session)
+            return str(existing_meta.id)
 
         await diary_meta_document.insert(session=session)
         return str(diary_meta_document.id)
