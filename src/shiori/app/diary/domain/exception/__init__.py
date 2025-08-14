@@ -13,3 +13,10 @@ class NotValidTitle(BaseCustomException):
         data: None = None,
     ):
         super().__init__(code=400, message=message, data=data)
+
+
+class NotValidDateRange(BaseCustomException):
+    def __init__(
+        self, message: str = "시작 날짜가 끝 날짜가 유효하지 않아요!", data: None = None
+    ):
+        super().__init__(code=400, message=message, data=data)
