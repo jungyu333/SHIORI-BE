@@ -1,3 +1,5 @@
+from beanie.operators import And
+
 from shiori.app.core.database.mongo_session import get_mongo_session
 from shiori.app.diary.domain.entity import DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryMetaRepository
@@ -25,3 +27,22 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
         await diary_meta_document.insert(session=session)
         return str(diary_meta_document.id)
+
+    async def get_diary_meta_by_date_range(
+        self, *, user_id: int, start_date: str, end_date: str
+    ) -> list[DiaryMetaVO]:
+
+        session = get_mongo_session()
+
+        diary_meta_docs = await DiaryMetaDocument.find(
+            And(
+                DiaryMetaDocument.user_id == user_id,
+                DiaryMetaDocument.date >= start_date,
+                DiaryMetaDocument.date <= end_date,
+            ),
+            session=session,
+        ).to_list()
+
+        return [
+            DiaryMetaVO.from_model(diary_meta_doc) for diary_meta_doc in diary_meta_docs
+        ]
