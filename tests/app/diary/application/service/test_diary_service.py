@@ -7,7 +7,11 @@ from pymongo.errors import PyMongoError
 from shiori.app.diary.application.service import DiaryService
 from shiori.app.diary.domain.entity import diary as DiaryVO
 from shiori.app.diary.domain.entity import diary_meta as DiaryMetaVO
-from shiori.app.diary.domain.exception import NotValidDateFormat, NotValidTitle
+from shiori.app.diary.domain.exception import (
+    NotValidDateFormat,
+    NotValidTitle,
+    NotValidDateRange,
+)
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
 from shiori.app.diary.infra.model import ProseMirror
 
@@ -494,3 +498,46 @@ async def test_get_week_diary_meta_invalid_date_format(
 
     assert e.value.message == "잘못된 날짜 형식이에요."
     assert e.value.code == 422
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
+async def test_get_week_diary_meta_invalid_date_range(
+    diary_repository_mock, diary_service
+):
+    # Given
+    user_id = 1
+    start_date = "20250810"
+    end_date = "20250816"
+
+    invalid_start_date = "20250816"
+    invalid_end_date = "20250810"
+
+    date_list = [
+        (datetime.strptime(start_date, "%Y%m%d") + timedelta(days=i)).strftime("%Y%m%d")
+        for i in range(
+            (
+                datetime.strptime(end_date, "%Y%m%d")
+                - datetime.strptime(start_date, "%Y%m%d")
+            ).days
+            + 1
+        )
+    ]
+
+    diary_metas = []
+    for date in date_list:
+        mock_vo = AsyncMock(spec=DiaryMetaVO)
+        mock_vo.date = date
+        mock_vo.user_id = user_id
+        diary_metas.append(mock_vo)
+
+    # When, Then
+    with pytest.raises(NotValidDateRange) as e:
+        result = await diary_service.get_week_diary_meta(
+            user_id=user_id,
+            start=invalid_start_date,
+            end=invalid_end_date,
+        )
+
+    assert e.value.message == "시작 날짜와 끝 날짜가 유효하지 않아요!"
+    assert e.value.code == 400
