@@ -210,14 +210,20 @@ async def test_get_diary():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_get_week_diary_meta(access_token_mock):
+@pytest.mark.parametrize(
+    "test_dates, expected_count",
+    [
+        (["20250810", "20250812", "20250814"], 3),
+        (["20250801", "20250802", "20250803"], 0),
+    ],
+)
+async def test_get_week_diary_meta(access_token_mock, test_dates, expected_count):
     # Given
     access_token = access_token_mock
 
     start_date = "20250810"
     end_date = "20250816"
 
-    test_dates = ["20250810", "20250812", "20250814"]
     content = {
         "type": "doc",
         "content": [
@@ -243,7 +249,7 @@ async def test_get_week_diary_meta(access_token_mock):
     # Then
     assert response.json().get("code") == 200
     assert response.json().get("message") == ""
-    assert len(response.json().get("data")) == len(test_dates)
+    assert len(response.json().get("data")) == expected_count
 
 
 @pytest.mark.mongo
