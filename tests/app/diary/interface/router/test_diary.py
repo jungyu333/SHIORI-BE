@@ -244,3 +244,22 @@ async def test_get_week_diary_meta(access_token_mock):
     assert response.json().get("code") == 200
     assert response.json().get("message") == ""
     assert len(response.json().get("data")) == len(test_dates)
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+async def test_get_week_diary_meta_omission_date(access_token_mock):
+    # Given
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    invalid_start_date = None
+
+    # When
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.get(f"/api/diary?start={invalid_start_date}")
+
+    # Then
+    assert response.json().get("code") == 422
+    assert response.json().get("message") == "요청값이 올바르지 않아요!"
+    assert response.json().get("data") is None
