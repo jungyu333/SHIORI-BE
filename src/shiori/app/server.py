@@ -37,18 +37,10 @@ def init_listener(app_: FastAPI) -> None:
     async def validation_exception_handler(
         request: Request, exc: RequestValidationError
     ):
-        errors = exc.errors()
 
-        def clean_msg(msg: str) -> str:
-            if msg.lower().startswith("value error, "):
-                return msg[13:].strip()
-            return msg
-
-        first_msg = (
-            clean_msg(errors[0]["msg"]) if errors else "요청값이 올바르지 않습니다"
+        validation_exc = ValidationException(
+            message="요청값이 올바르지 않아요!", data=None
         )
-
-        validation_exc = ValidationException(message=first_msg, data=None)
 
         return await custom_exception_handler(request, validation_exc)
 
