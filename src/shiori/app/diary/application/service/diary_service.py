@@ -95,3 +95,20 @@ class DiaryService:
             return diary_vo.diary_content
 
         return None
+
+    async def get_week_diary_meta(
+        self, *, user_id: int, start: str, end: str
+    ) -> list[DiaryMetaVO]:
+
+        DiaryMetaValidator.validate_date_format(start)
+        DiaryMetaValidator.validate_date_format(end)
+
+        DiaryMetaValidator.validate_date_range(start=start, end=end)
+
+        diary_meta_list = await self._diary_meta_repo.get_diary_meta_by_date_range(
+            user_id=user_id,
+            start_date=start,
+            end_date=end,
+        )
+
+        return diary_meta_list
