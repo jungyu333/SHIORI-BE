@@ -12,3 +12,9 @@ class DiaryRepository(ABC):
     @abstractmethod
     async def get_diary_by_date(self, *, user_id: int, date: str) -> DiaryVO | None:
         pass
+
+    @abstractmethod
+    async def get_diary_by_date_range(
+        self, *, user_id: int, start_date: str, end_date: str
+    ) -> list[DiaryVO]:
+        pass

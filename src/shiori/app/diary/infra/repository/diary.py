@@ -1,3 +1,4 @@
+from beanie.operators import And
 from bson import ObjectId
 
 from shiori.app.core.database.mongo_session import get_mongo_session
@@ -48,3 +49,24 @@ class DiaryRepositoryImpl(DiaryRepository):
             return diary_vo
 
         return None
+
+    async def get_diary_by_date_range(
+        self, *, user_id: int, start_date: str, end_date: str
+    ) -> list[DiaryVO]:
+
+        session = get_mongo_session()
+
+        diary_docs = (
+            await DiaryDocument.find(
+                And(
+                    DiaryDocument.user_id == user_id,
+                    DiaryDocument.date >= start_date,
+                    DiaryDocument.date <= end_date,
+                ),
+                session=session,
+            )
+            .sort("date")
+            .to_list(7)
+        )
+
+        return [DiaryVO.from_model(diary_doc) for diary_doc in diary_docs]
