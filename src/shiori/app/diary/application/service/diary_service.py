@@ -1,6 +1,7 @@
 from typing import Optional
 
 from shiori.app.core.database import MongoTransactional
+from shiori.app.diary.domain.constants import REQUIRED_DAYS_FOR_SUMMARY
 from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
 from shiori.app.diary.domain.validator import DiaryMetaValidator
@@ -112,3 +113,28 @@ class DiaryService:
         )
 
         return diary_meta_list
+
+    async def get_week_diary(
+        self, *, user_id: int, start: str, end: str
+    ) -> list[DiaryVO]:
+        diary_list = await self._diary_repo.get_diary_by_date_range(
+            user_id=user_id,
+            start_date=start,
+            end_date=end,
+        )
+
+        return diary_list
+
+    async def summarize_diary(self, *, user_id: int, start: str, end: str):
+
+        ## 7일치 diary get
+        week_diary = await self.get_week_diary(
+            user_id=user_id,
+            start=start,
+            end=end,
+        )
+
+        if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
+            return None
+
+        ## tag inference
