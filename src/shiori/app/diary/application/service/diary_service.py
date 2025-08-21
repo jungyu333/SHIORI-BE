@@ -117,6 +117,12 @@ class DiaryService:
     async def get_week_diary(
         self, *, user_id: int, start: str, end: str
     ) -> list[DiaryVO]:
+
+        DiaryMetaValidator.validate_date_format(start)
+        DiaryMetaValidator.validate_date_format(end)
+
+        DiaryMetaValidator.validate_date_range(start=start, end=end)
+
         diary_list = await self._diary_repo.get_diary_by_date_range(
             user_id=user_id,
             start_date=start,
@@ -125,7 +131,7 @@ class DiaryService:
 
         return diary_list
 
-    async def summarize_diary(self, *, user_id: int, start: str, end: str):
+    async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
 
         ## 7일치 diary get
         week_diary = await self.get_week_diary(
@@ -135,6 +141,7 @@ class DiaryService:
         )
 
         if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
-            return None
+            return False
 
         ## tag inference
+        return True
