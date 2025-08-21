@@ -714,3 +714,26 @@ async def test_summarize_diary(diary_repository_mock, diary_service):
 
     # Then
     assert result == True
+
+
+async def test_summarize_diary_return_none_diary(diary_repository_mock, diary_service):
+
+    # Given
+
+    user_id = 1
+    start_date = "20250810"
+    end_date = "20250816"
+
+    diary_repository_mock.get_diary_by_date_range.return_value = []
+
+    # When
+
+    result = await diary_service.summarize_diary(
+        user_id=user_id,
+        start=start_date,
+        end=end_date,
+    )
+
+    # Then
+
+    assert result == False
