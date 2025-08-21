@@ -541,3 +541,47 @@ async def test_get_week_diary_meta_invalid_date_range(
 
     assert e.value.message == "시작 날짜와 끝 날짜가 유효하지 않아요!"
     assert e.value.code == 400
+
+
+@pytest.mark.asyncio
+@pytest.mark.mongo
+async def test_get_week_diary(diary_repository_mock, diary_service):
+    # Given
+    user_id = 1
+    start_date = "20250810"
+    end_date = "20250816"
+
+    diary_content_dict = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [
+                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
+                ],
+            }
+        ],
+    }
+
+    content = ProseMirror(**diary_content_dict)
+
+    diary_vo_mock = AsyncMock(spec=DiaryVO)
+    diary_vo_mock.diary_content = content
+
+    expected = [diary_vo_mock] * 7
+
+    diary_repository_mock.get_diary_by_date_range.return_value = expected
+
+    # When
+
+    result = await diary_service.get_week_diary(
+        user_id=user_id,
+        start=start_date,
+        end=end_date,
+    )
+
+    # Then
+    assert result == expected
+    assert len(result) == len(expected)
+    assert diary_repository_mock.get_diary_by_date_range.call_count == 1
