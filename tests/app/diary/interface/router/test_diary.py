@@ -14,9 +14,9 @@ def access_token_mock():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_upsert_diary():
+async def test_upsert_diary(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
 
     date = "20250728"
     content = {
@@ -53,9 +53,9 @@ async def test_upsert_diary():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_upsert_diary_update():
+async def test_upsert_diary_update(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
 
     date = "20250728"
     content = {
@@ -94,9 +94,9 @@ async def test_upsert_diary_update():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_upsert_diary_invalid_date():
+async def test_upsert_diary_invalid_date(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
 
     date = "2025-07-28"
     content = {
@@ -132,9 +132,9 @@ async def test_upsert_diary_invalid_date():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_get_diary_empty():
+async def test_get_diary_empty(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
     date = "20250728"
 
     # When
@@ -151,9 +151,9 @@ async def test_get_diary_empty():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_get_diary_invalid_date():
+async def test_get_diary_invalid_date(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
     date = "2025-07-28"
 
     # When
@@ -169,9 +169,9 @@ async def test_get_diary_invalid_date():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_get_diary():
+async def test_get_diary(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
     date = "20250728"
 
     content = {
@@ -309,6 +309,132 @@ async def test_get_week_diary_meta_invalid_date_range(access_token_mock):
         response = await client.get(
             f"/api/diary?start={invalid_start_date}&end={invalid_end_date}"
         )
+
+    # Then
+    assert response.json().get("code") == 400
+    assert response.json().get("message") == "시작 날짜와 끝 날짜가 유효하지 않아요!"
+    assert response.json().get("data") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+async def test_summarize_diary_none_diary(access_token_mock):
+    # Given
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+    start_date = "20250810"
+    end_date = "20250816"
+    body = {"start": start_date, "end": end_date}
+
+    # When
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.post("/api/diary/summary", json=body)
+
+    # Then
+    assert response.json().get("code") == 204
+    assert (
+        response.json().get("message") == "요약할 일지가 없어요! 일지를 작성해주세요!"
+    )
+    assert response.json().get("data") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "test_dates",
+    [
+        [
+            "20250810",
+            "20250811",
+            "20250812",
+            "20250813",
+            "20250814",
+            "20250815",
+            "20250816",
+        ],
+    ],
+)
+async def test_summarize_diary(access_token_mock, test_dates):
+    # Given
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    start_date = "20250810"
+    end_date = "20250816"
+
+    summary_body = {
+        "start": start_date,
+        "end": end_date,
+    }
+
+    content = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [{"type": "text", "text": "test"}],
+            }
+        ],
+    }
+
+    body = {"content": content, "title": "test_title"}
+
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        for date in test_dates:
+            await client.post(f"/api/diary/{date}", json=body)
+
+        # When
+        response = await client.post(f"/api/diary/summary", json=summary_body)
+
+    # Then
+    assert response.json().get("code") == 200
+    assert (
+        response.json().get("message") == "요약이 완료되었어요! 잠시 후 확인해보세요."
+    )
+    assert response.json().get("data") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+async def test_summarize_diary_invalid_date_format(access_token_mock):
+    # Given
+    access_token = access_token_mock
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    invalid_start_date = "2025-08-10"
+    invalid_end_date = "2025-08-16"
+
+    body = {"start": invalid_start_date, "end": invalid_end_date}
+
+    # When
+
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.post("/api/diary/summary", json=body)
+
+    # Then
+
+    assert response.json().get("code") == 422
+    assert response.json().get("message") == "잘못된 날짜 형식이에요."
+    assert response.json().get("data") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+async def test_summarize_diary_invalid_date_range(access_token_mock):
+    # Given
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    invalid_start_date = "20250816"
+    invalid_end_date = "20250810"
+
+    body = {"start": invalid_start_date, "end": invalid_end_date}
+
+    # When
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.post("/api/diary/summary", json=body)
 
     # Then
     assert response.json().get("code") == 400
