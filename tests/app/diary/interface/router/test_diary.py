@@ -14,9 +14,9 @@ def access_token_mock():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_upsert_diary():
+async def test_upsert_diary(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
 
     date = "20250728"
     content = {
@@ -53,9 +53,9 @@ async def test_upsert_diary():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_upsert_diary_update():
+async def test_upsert_diary_update(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
 
     date = "20250728"
     content = {
@@ -94,9 +94,9 @@ async def test_upsert_diary_update():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_upsert_diary_invalid_date():
+async def test_upsert_diary_invalid_date(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
 
     date = "2025-07-28"
     content = {
@@ -132,9 +132,9 @@ async def test_upsert_diary_invalid_date():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_get_diary_empty():
+async def test_get_diary_empty(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
     date = "20250728"
 
     # When
@@ -151,9 +151,9 @@ async def test_get_diary_empty():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_get_diary_invalid_date():
+async def test_get_diary_invalid_date(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
     date = "2025-07-28"
 
     # When
@@ -169,9 +169,9 @@ async def test_get_diary_invalid_date():
 
 @pytest.mark.mongo
 @pytest.mark.asyncio
-async def test_get_diary():
+async def test_get_diary(access_token_mock):
     # Given
-    access_token = TokenHelper.encode({"user_id": 1, "is_admin": False})
+    access_token = access_token_mock
     date = "20250728"
 
     content = {
