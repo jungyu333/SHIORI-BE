@@ -336,3 +336,60 @@ async def test_summarize_diary_none_diary(access_token_mock):
         response.json().get("message") == "요약할 일지가 없어요! 일지를 작성해주세요!"
     )
     assert response.json().get("data") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "test_dates",
+    [
+        [
+            "20250810",
+            "20250811",
+            "20250812",
+            "20250813",
+            "20250814",
+            "20250815",
+            "20250816",
+        ],
+    ],
+)
+async def test_summarize_diary(access_token_mock, test_dates):
+    # Given
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    start_date = "20250810"
+    end_date = "20250816"
+
+    summary_body = {
+        "start": start_date,
+        "end": end_date,
+    }
+
+    content = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"textAlign": "left"},
+                "content": [{"type": "text", "text": "test"}],
+            }
+        ],
+    }
+
+    body = {"content": content, "title": "test_title"}
+
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        for date in test_dates:
+            await client.post(f"/api/diary/{date}", json=body)
+
+        # When
+        response = await client.post(f"/api/diary/summary", json=summary_body)
+
+    # Then
+    assert response.json().get("code") == 200
+    assert (
+        response.json().get("message") == "요약이 완료되었어요! 잠시 후 확인해보세요."
+    )
+    assert response.json().get("data") is None
