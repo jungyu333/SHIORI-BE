@@ -2,12 +2,14 @@ import torch
 from torch import nn
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from shiori.app.diary.domain.constants import MODEL_NAME
+
 
 class EmotionModel:
     def __init__(
         self,
         *,
-        model_name: str = "dlckdfuf141/korean-emotion-kluebert-v2",
+        model_name: str = MODEL_NAME,
         device: str = "cpu",
     ):
         self.device = torch.device(device)
