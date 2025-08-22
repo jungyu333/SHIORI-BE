@@ -393,3 +393,28 @@ async def test_summarize_diary(access_token_mock, test_dates):
         response.json().get("message") == "요약이 완료되었어요! 잠시 후 확인해보세요."
     )
     assert response.json().get("data") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+async def test_summarize_diary_invalid_date_format(access_token_mock):
+    # Given
+    access_token = access_token_mock
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    invalid_start_date = "2025-08-10"
+    invalid_end_date = "2025-08-16"
+
+    body = {"start": invalid_start_date, "end": invalid_end_date}
+
+    # When
+
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.post("/api/diary/summary", json=body)
+
+    # Then
+
+    assert response.json().get("code") == 422
+    assert response.json().get("message") == "잘못된 날짜 형식이에요."
+    assert response.json().get("data") is None
