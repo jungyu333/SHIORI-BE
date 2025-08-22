@@ -314,3 +314,25 @@ async def test_get_week_diary_meta_invalid_date_range(access_token_mock):
     assert response.json().get("code") == 400
     assert response.json().get("message") == "시작 날짜와 끝 날짜가 유효하지 않아요!"
     assert response.json().get("data") is None
+
+
+@pytest.mark.mongo
+@pytest.mark.asyncio
+async def test_summarize_diary_none_diary(access_token_mock):
+    # Given
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+    start_date = "20250810"
+    end_date = "20250816"
+    body = {"start": start_date, "end": end_date}
+
+    # When
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.post("/api/diary/summary", json=body)
+
+    # Then
+    assert response.json().get("code") == 204
+    assert (
+        response.json().get("message") == "요약할 일지가 없어요! 일지를 작성해주세요!"
+    )
+    assert response.json().get("data") is None

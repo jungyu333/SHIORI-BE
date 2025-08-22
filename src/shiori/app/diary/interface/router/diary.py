@@ -24,6 +24,37 @@ router = APIRouter()
 
 
 @router.post(
+    "/summary",
+    response_model=StandardResponse,
+    dependencies=[Depends(PermissionDependency([IsAuthenticated]))],
+)
+@inject
+async def summarize_diary(
+    body: SummarizeDiaryRequest,
+    request: Request,
+    use_case: CreateSummarize = Depends(Provide[Container.create_summarize]),
+):
+    user_id = request.user.id
+    start_date = body.start
+    end_date = body.end
+
+    is_success = await use_case.execute(
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    return {
+        "code": 200 if is_success else 204,
+        "message": (
+            "요약이 완료되었어요! 잠시 후 확인해보세요."
+            if is_success
+            else "요약할 일지가 없어요! 일지를 작성해주세요!"
+        ),
+    }
+
+
+@router.post(
     "/{date}",
     response_model=StandardResponse[UpsertDiaryResponse],
     dependencies=[Depends(PermissionDependency([IsAuthenticated]))],
@@ -121,35 +152,4 @@ async def get_week_diary_meta(
         "code": 200,
         "message": "",
         "data": response,
-    }
-
-
-@router.post(
-    "/summary",
-    response_model=StandardResponse,
-    dependencies=[Depends(PermissionDependency([IsAuthenticated]))],
-)
-@inject
-async def summarize_diary(
-    request: Request,
-    body: SummarizeDiaryRequest,
-    use_case: CreateSummarize = Depends(Provide[Container.create_summarize]),
-):
-    user_id = request.user.id
-    start_date = body.start
-    end_date = body.end
-
-    is_success = await use_case.execute(
-        user_id=user_id,
-        start_date=start_date,
-        end_date=end_date,
-    )
-
-    return {
-        "code": 200 if is_success else 204,
-        "message": (
-            "요약이 완료되었어요! 잠시 후 확인해보세요."
-            if is_success
-            else "요약할 일지가 없어요! 일지를 작성해주세요!"
-        ),
     }
