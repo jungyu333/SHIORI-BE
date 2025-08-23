@@ -1,4 +1,5 @@
 import json
+import time
 
 import pytest
 
@@ -30,10 +31,12 @@ async def test_analyze_day(
     pipeline = emotion_pipeline
 
     # When
-
+    start = time.perf_counter()
     result = await pipeline.analyze_day(daily_texts)
-
+    elapsed = time.perf_counter() - start
     # Then
+
+    print(f"\n[analyze_day duration] {elapsed:.4f} seconds")
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
     assert isinstance(result, dict)
@@ -99,9 +102,14 @@ async def test_analyze(
     pipeline = emotion_pipeline
 
     # When
+    start = time.perf_counter()
     results = await pipeline.analyze(week_diary_texts)
+    elapsed = time.perf_counter() - start
 
     # Then
+
+    print(f"\n[analyze (weekly) duration] {elapsed:.4f} seconds")
+
     assert isinstance(results, list)
     assert len(results) == 7
 
