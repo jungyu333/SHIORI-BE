@@ -5,7 +5,9 @@ from shiori.app.diary.domain.constants import REQUIRED_DAYS_FOR_SUMMARY
 from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
 from shiori.app.diary.domain.validator import DiaryMetaValidator
+from shiori.app.diary.infra.emotion import EmotionPipeline, EmotionModel
 from shiori.app.diary.infra.model import ProseMirror
+from tests.app.diary.application.adaptor import EmotionAdaptor
 
 
 class DiaryService:
@@ -14,6 +16,8 @@ class DiaryService:
     ):
         self._diary_repo = diary_repo
         self._diary_meta_repo = diary_meta_repo
+        self._emotion_pipeline = EmotionPipeline(model=EmotionModel())
+        self._adaptor = EmotionAdaptor()
 
     async def save_diary(
         self,
@@ -144,4 +148,9 @@ class DiaryService:
             return False
 
         ## tag inference
+
+        week_inputs = self._adaptor.convert_week(diaries=week_diary)
+
+        emotion_results = await self._emotion_pipeline.analyze(week_inputs)
+
         return True
