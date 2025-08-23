@@ -1,4 +1,3 @@
-import json
 import time
 
 import pytest
@@ -37,7 +36,6 @@ async def test_analyze_day(
     # Then
 
     print(f"\n[analyze_day duration] {elapsed:.4f} seconds")
-    print(json.dumps(result, ensure_ascii=False, indent=2))
 
     assert isinstance(result, dict)
     assert "predicted" in result
@@ -114,7 +112,7 @@ async def test_analyze(
     assert len(results) == 7
 
     for result in results:
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+
         assert isinstance(result, dict)
         assert "predicted" in result
         assert isinstance(result["predicted"], str)
