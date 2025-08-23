@@ -11,8 +11,15 @@ def emotion_model() -> EmotionModel:
     return EmotionModel(model_name=MODEL_NAME, device="cpu")
 
 
+@pytest.fixture
+def emotion_pipeline(emotion_model: EmotionModel) -> EmotionPipeline:
+    return EmotionPipeline(model=emotion_model)
+
+
 @pytest.mark.asyncio
-async def test_analyze_day(emotion_model: EmotionModel):
+async def test_analyze_day(
+    emotion_model: EmotionModel, emotion_pipeline: EmotionPipeline
+):
     # Given
     daily_texts = [
         "오늘 하루는 정말 즐거웠고, 기분이 좋았어.",
@@ -20,7 +27,7 @@ async def test_analyze_day(emotion_model: EmotionModel):
         "햇볕도 따뜻해서 산책하기 딱 좋은 날이었어.",
     ]
 
-    pipeline = EmotionPipeline(model=emotion_model)
+    pipeline = emotion_pipeline
 
     # When
 
@@ -47,7 +54,9 @@ async def test_analyze_day(emotion_model: EmotionModel):
 
 
 @pytest.mark.asyncio
-async def test_analyze(emotion_model: EmotionModel) -> None:
+async def test_analyze(
+    emotion_model: EmotionModel, emotion_pipeline: EmotionPipeline
+) -> None:
     # Given
     week_diary_texts: list[list[str]] = [
         [
@@ -87,7 +96,7 @@ async def test_analyze(emotion_model: EmotionModel) -> None:
         ],
     ]
 
-    pipeline = EmotionPipeline(model=emotion_model)
+    pipeline = emotion_pipeline
 
     # When
     results = await pipeline.analyze(week_diary_texts)
