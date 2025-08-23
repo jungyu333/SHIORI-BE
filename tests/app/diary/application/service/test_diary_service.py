@@ -5,8 +5,7 @@ import pytest
 from pymongo.errors import PyMongoError
 
 from shiori.app.diary.application.service import DiaryService
-from shiori.app.diary.domain.entity import diary as DiaryVO
-from shiori.app.diary.domain.entity import diary_meta as DiaryMetaVO
+from shiori.app.diary.domain.entity import DiaryVO, DiaryBlockVO, DiaryMetaVO
 from shiori.app.diary.domain.exception import (
     NotValidDateFormat,
     NotValidTitle,
@@ -699,6 +698,16 @@ async def test_summarize_diary(diary_repository_mock, diary_service):
 
     diary_vo_mock = AsyncMock(spec=DiaryVO)
     diary_vo_mock.diary_content = content
+
+    diary_vo_mock.diary_blocks = [
+        DiaryBlockVO(
+            order=0,
+            type="paragraph",
+            content="hello",
+            textAlign="left",
+            marks=["bold"],
+        )
+    ]
 
     expected = [diary_vo_mock] * 7
 
