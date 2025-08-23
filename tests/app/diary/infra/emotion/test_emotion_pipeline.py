@@ -2,13 +2,48 @@ import json
 
 import pytest
 
-from shiori.app.diary.domain.constants import MODEL_NAME
+from shiori.app.diary.domain.constants import MODEL_NAME, EMOTION_LABELS
 from shiori.app.diary.infra.emotion import EmotionModel, EmotionPipeline
 
 
 @pytest.fixture
 def emotion_model() -> EmotionModel:
     return EmotionModel(model_name=MODEL_NAME, device="cpu")
+
+
+@pytest.mark.asyncio
+async def test_analyze_day(emotion_model: EmotionModel):
+    # Given
+    daily_texts = [
+        "오늘 하루는 정말 즐거웠고, 기분이 좋았어.",
+        "오랜만에 친구들과 웃고 떠들면서 스트레스를 풀었지.",
+        "햇볕도 따뜻해서 산책하기 딱 좋은 날이었어.",
+    ]
+
+    pipeline = EmotionPipeline(model=emotion_model)
+
+    # When
+
+    result = await pipeline.analyze_day(daily_texts)
+
+    # Then
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+    assert isinstance(result, dict)
+    assert "predicted" in result
+    assert isinstance(result["predicted"], str)
+    assert result["predicted"] in EMOTION_LABELS.values()
+
+    assert "probabilities" in result
+    assert isinstance(result["probabilities"], dict)
+
+    total_prob = sum(result["probabilities"].values())
+    assert abs(total_prob - 1.0) < 0.01
+
+    for label, prob in result["probabilities"].items():
+        assert isinstance(label, str)
+        assert isinstance(prob, float)
+        assert 0.0 <= prob <= 1.0
 
 
 @pytest.mark.asyncio
