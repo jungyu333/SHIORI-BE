@@ -3,6 +3,7 @@ import time
 import pytest
 
 from shiori.app.diary.domain.constants import MODEL_NAME, EMOTION_LABELS
+from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.infra.emotion import EmotionModel, EmotionPipeline
 
 
@@ -33,22 +34,19 @@ async def test_analyze_day(
     start = time.perf_counter()
     result = await pipeline.analyze_day(daily_texts)
     elapsed = time.perf_counter() - start
-    # Then
 
     print(f"\n[analyze_day duration] {elapsed:.4f} seconds")
 
-    assert isinstance(result, dict)
-    assert "predicted" in result
-    assert isinstance(result["predicted"], str)
-    assert result["predicted"] in EMOTION_LABELS.values()
+    # Then
+    assert isinstance(result, EmotionResult)
+    assert isinstance(result.predicted, str)
+    assert result.predicted in EMOTION_LABELS.values()
+    assert isinstance(result.probabilities, dict)
 
-    assert "probabilities" in result
-    assert isinstance(result["probabilities"], dict)
-
-    total_prob = sum(result["probabilities"].values())
+    total_prob = sum(result.probabilities.values())
     assert abs(total_prob - 1.0) < 0.01
 
-    for label, prob in result["probabilities"].items():
+    for label, prob in result.probabilities.items():
         assert isinstance(label, str)
         assert isinstance(prob, float)
         assert 0.0 <= prob <= 1.0
@@ -104,25 +102,22 @@ async def test_analyze(
     results = await pipeline.analyze(week_diary_texts)
     elapsed = time.perf_counter() - start
 
-    # Then
-
     print(f"\n[analyze (weekly) duration] {elapsed:.4f} seconds")
 
+    # Then
     assert isinstance(results, list)
     assert len(results) == 7
 
     for result in results:
+        assert isinstance(result, EmotionResult)
+        assert isinstance(result.predicted, str)
+        assert result.predicted in EMOTION_LABELS.values()
+        assert isinstance(result.probabilities, dict)
 
-        assert isinstance(result, dict)
-        assert "predicted" in result
-        assert isinstance(result["predicted"], str)
-        assert "probabilities" in result
-        assert isinstance(result["probabilities"], dict)
-
-        total_prob = sum(result["probabilities"].values())
+        total_prob = sum(result.probabilities.values())
         assert abs(total_prob - 1.0) < 0.01
 
-        for label, prob in result["probabilities"].items():
+        for label, prob in result.probabilities.items():
             assert isinstance(label, str)
             assert isinstance(prob, float)
             assert 0.0 <= prob <= 1.0

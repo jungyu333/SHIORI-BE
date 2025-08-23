@@ -1,6 +1,7 @@
 import pytest
 
 from shiori.app.diary.domain.constants import MODEL_NAME
+from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.infra.emotion import EmotionModel
 
 
@@ -29,17 +30,15 @@ async def test_predict(emotion_model: EmotionModel, text):
 
     # Then
 
-    assert isinstance(result, dict)
-    assert "predicted" in result
-    assert isinstance(result["predicted"], str)
+    assert isinstance(result, EmotionResult)
 
-    assert "probabilities" in result
-    assert isinstance(result["probabilities"], dict)
+    assert isinstance(result.predicted, str)
+    assert isinstance(result.probabilities, dict)
 
-    for label, score in result["probabilities"].items():
+    total_prob = sum(result.probabilities.values())
+    assert abs(total_prob - 1.0) < 0.01
+
+    for label, score in result.probabilities.items():
         assert isinstance(label, str)
         assert isinstance(score, float)
         assert 0.0 <= score <= 1.0
-
-    total_prob = sum(result["probabilities"].values())
-    assert abs(total_prob - 1.0) < 0.01
