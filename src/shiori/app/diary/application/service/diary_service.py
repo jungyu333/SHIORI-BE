@@ -173,6 +173,8 @@ class DiaryService:
         if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
             return False
 
+        diary_meta_ids = [diary.diary_meta_id for diary in week_diary]
+
         ## tag inference
 
         week_inputs = self._adaptor.convert_week(diaries=week_diary)
