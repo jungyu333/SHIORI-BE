@@ -144,6 +144,7 @@ class DiaryService:
 
         return diary_list
 
+    @Transactional()
     async def upsert_diary_tag(
         self, *, diary: list[DiaryVO], emotion_probs: list[EmotionResult]
     ) -> None:
@@ -160,7 +161,6 @@ class DiaryService:
 
             await self._tag_repo.upsert(tag=tag_vo)
 
-    @Transactional()
     async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
 
         ## 7일치 diary get
