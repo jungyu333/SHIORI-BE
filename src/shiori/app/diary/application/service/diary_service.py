@@ -11,7 +11,7 @@ from shiori.app.diary.domain.repository import (
 from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.domain.validator import DiaryMetaValidator
 from shiori.app.diary.infra.emotion import EmotionPipeline, EmotionModel
-from shiori.app.diary.infra.model import ProseMirror
+from shiori.app.diary.infra.model import ProseMirror, SummaryStatus
 from tests.app.diary.application.adaptor import EmotionAdaptor
 
 
@@ -161,6 +161,15 @@ class DiaryService:
 
             await self._tag_repo.upsert(tag=tag_vo)
 
+    @MongoTransactional()
+    async def update_summary_status(
+        self, *, diary_meta_id: list[str], status: SummaryStatus
+    ):
+        await self._diary_meta_repo.update_summary_status_by_meta_id(
+            diary_meta_id=diary_meta_id,
+            status=status,
+        )
+
     async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
 
         ## 7일치 diary get
@@ -175,12 +184,24 @@ class DiaryService:
 
         diary_meta_ids = [diary.diary_meta_id for diary in week_diary]
 
-        ## tag inference
+        try:
+            ## tag inference
 
-        week_inputs = self._adaptor.convert_week(diaries=week_diary)
+            await self.update_summary_status(
+                diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
+            )
 
-        emotion_results = await self._emotion_pipeline.analyze(week_inputs)
+            week_inputs = self._adaptor.convert_week(diaries=week_diary)
 
-        await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
+            emotion_results = await self._emotion_pipeline.analyze(week_inputs)
 
-        return True
+            await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
+
+            return True
+
+        except Exception as e:
+
+            await self.update_summary_status(
+                diary_meta_id=diary_meta_ids, status=SummaryStatus.failed
+            )
+            return False
