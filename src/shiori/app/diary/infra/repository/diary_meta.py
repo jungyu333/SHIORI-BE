@@ -1,4 +1,4 @@
-from beanie.operators import And
+from beanie.operators import And, Set, In
 from bson import ObjectId
 
 from shiori.app.core.database.mongo_session import get_mongo_session
@@ -56,8 +56,6 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
         object_ids = [ObjectId(id_str) for id_str in diary_meta_id]
 
-        await DiaryMetaDocument.update_many(
-            filter={"_id": {"$in": object_ids}},
-            update={"$set": {"summary_status": status.value}},
-            session=session,
-        )
+        await DiaryMetaDocument.find(
+            In(DiaryMetaDocument.id, object_ids), session=session
+        ).update_many(Set({DiaryMetaDocument.summary_status: status}), session=session)
