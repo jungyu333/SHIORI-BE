@@ -11,7 +11,11 @@ from shiori.app.diary.domain.exception import (
     NotValidTitle,
     NotValidDateRange,
 )
-from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
+from shiori.app.diary.domain.repository import (
+    DiaryRepository,
+    DiaryMetaRepository,
+    TagRepository,
+)
 from shiori.app.diary.infra.model import ProseMirror
 
 
@@ -26,10 +30,18 @@ def diary_meta_repository_mock():
 
 
 @pytest.fixture
-def diary_service(diary_repository_mock, diary_meta_repository_mock):
+def tag_repository_mock():
+    return AsyncMock(spec=TagRepository)
+
+
+@pytest.fixture
+def diary_service(
+    diary_repository_mock, diary_meta_repository_mock, tag_repository_mock
+):
     return DiaryService(
         diary_repo=diary_repository_mock,
         diary_meta_repo=diary_meta_repository_mock,
+        tag_repo=tag_repository_mock,
     )
 
 
