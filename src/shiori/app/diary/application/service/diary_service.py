@@ -197,6 +197,10 @@ class DiaryService:
 
             await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
 
+            await self.update_summary_status(
+                diary_meta_id=diary_meta_ids, status=SummaryStatus.completed
+            )
+
             return True
 
         except Exception as e:
