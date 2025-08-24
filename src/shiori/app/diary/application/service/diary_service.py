@@ -1,19 +1,32 @@
 from typing import Optional
 
-from shiori.app.core.database import MongoTransactional
+from shiori.app.core.database import MongoTransactional, Transactional
 from shiori.app.diary.domain.constants import REQUIRED_DAYS_FOR_SUMMARY
-from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO
-from shiori.app.diary.domain.repository import DiaryRepository, DiaryMetaRepository
+from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO, TagVO
+from shiori.app.diary.domain.repository import (
+    DiaryRepository,
+    DiaryMetaRepository,
+    TagRepository,
+)
+from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.domain.validator import DiaryMetaValidator
-from shiori.app.diary.infra.model import ProseMirror
+from shiori.app.diary.infra.emotion import EmotionPipeline, EmotionModel
+from shiori.app.diary.infra.model import ProseMirror, SummaryStatus
+from tests.app.diary.application.adaptor import EmotionAdaptor
 
 
 class DiaryService:
     def __init__(
-        self, diary_repo: DiaryRepository, diary_meta_repo: DiaryMetaRepository
+        self,
+        diary_repo: DiaryRepository,
+        diary_meta_repo: DiaryMetaRepository,
+        tag_repo: TagRepository,
     ):
         self._diary_repo = diary_repo
         self._diary_meta_repo = diary_meta_repo
+        self._tag_repo = tag_repo
+        self._emotion_pipeline = EmotionPipeline(model=EmotionModel())
+        self._adaptor = EmotionAdaptor()
 
     async def save_diary(
         self,
@@ -131,6 +144,32 @@ class DiaryService:
 
         return diary_list
 
+    @Transactional()
+    async def upsert_diary_tag(
+        self, *, diary: list[DiaryVO], emotion_probs: list[EmotionResult]
+    ) -> None:
+
+        for diary_vo, result in zip(diary, emotion_probs):
+            predicted_label = result.predicted
+            confidence = result.probabilities[predicted_label]
+
+            tag_vo = TagVO(
+                diary_meta_id=diary_vo.diary_meta_id,
+                label=predicted_label,
+                confidence=confidence,
+            )
+
+            await self._tag_repo.upsert(tag=tag_vo)
+
+    @MongoTransactional()
+    async def update_summary_status(
+        self, *, diary_meta_id: list[str], status: SummaryStatus
+    ):
+        await self._diary_meta_repo.update_summary_status_by_meta_id(
+            diary_meta_id=diary_meta_id,
+            status=status,
+        )
+
     async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
 
         ## 7일치 diary get
@@ -143,5 +182,26 @@ class DiaryService:
         if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
             return False
 
-        ## tag inference
-        return True
+        diary_meta_ids = [diary.diary_meta_id for diary in week_diary]
+
+        try:
+            ## tag inference
+
+            await self.update_summary_status(
+                diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
+            )
+
+            week_inputs = self._adaptor.convert_week(diaries=week_diary)
+
+            emotion_results = await self._emotion_pipeline.analyze(week_inputs)
+
+            await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
+
+            return True
+
+        except Exception as e:
+
+            await self.update_summary_status(
+                diary_meta_id=diary_meta_ids, status=SummaryStatus.failed
+            )
+            return False

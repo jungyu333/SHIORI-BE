@@ -1,9 +1,10 @@
-from beanie.operators import And
+from beanie.operators import And, Set, In
+from bson import ObjectId
 
 from shiori.app.core.database.mongo_session import get_mongo_session
 from shiori.app.diary.domain.entity import DiaryMetaVO
 from shiori.app.diary.domain.repository import DiaryMetaRepository
-from shiori.app.diary.infra.model import DiaryMetaDocument
+from shiori.app.diary.infra.model import DiaryMetaDocument, SummaryStatus
 
 
 class DiaryMetaRepositoryImpl(DiaryMetaRepository):
@@ -46,3 +47,15 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
         return [
             DiaryMetaVO.from_model(diary_meta_doc) for diary_meta_doc in diary_meta_docs
         ]
+
+    async def update_summary_status_by_meta_id(
+        self, diary_meta_id: list[str], status: SummaryStatus
+    ) -> None:
+
+        session = get_mongo_session()
+
+        object_ids = [ObjectId(id_str) for id_str in diary_meta_id]
+
+        await DiaryMetaDocument.find(
+            In(DiaryMetaDocument.id, object_ids), session=session
+        ).update_many(Set({DiaryMetaDocument.summary_status: status}), session=session)
