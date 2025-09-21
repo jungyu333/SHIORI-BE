@@ -2,6 +2,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings
 
 from shiori.app.utils import get_root_path
@@ -24,7 +25,7 @@ class BaseConfig(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     MONGO_DB_URL: str
     MONGO_DB_NAME: str
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: SecretStr
 
     class Config:
         env_file = ENV_DIR / ".env.development"  # fallback
