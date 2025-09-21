@@ -10,9 +10,9 @@ from shiori.app.diary.domain.repository import (
 )
 from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.domain.validator import DiaryMetaValidator
-from shiori.app.diary.infra.emotion import EmotionPipeline, EmotionModel
+from shiori.app.diary.infra.emotion import EmotionPipeline, EmotionModel, EmotionAdaptor
 from shiori.app.diary.infra.model import ProseMirror, SummaryStatus
-from tests.app.diary.application.adaptor import EmotionAdaptor
+from shiori.app.diary.infra.summarize import SummarizePipeline
 
 
 class DiaryService:
@@ -25,8 +25,9 @@ class DiaryService:
         self._diary_repo = diary_repo
         self._diary_meta_repo = diary_meta_repo
         self._tag_repo = tag_repo
-        self._emotion_pipeline = EmotionPipeline(model=EmotionModel())
         self._adaptor = EmotionAdaptor()
+        self._emotion_pipeline = EmotionPipeline(model=EmotionModel())
+        self._summarize_pipeline = SummarizePipeline()
 
     async def save_diary(
         self,
@@ -196,6 +197,10 @@ class DiaryService:
             emotion_results = await self._emotion_pipeline.analyze(week_inputs)
 
             await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
+
+            summary_result = await self._summarize_pipeline.run(
+                diaries=week_diary, emotions=emotion_results
+            )
 
             await self.update_summary_status(
                 diary_meta_id=diary_meta_ids, status=SummaryStatus.completed
