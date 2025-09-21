@@ -38,6 +38,7 @@ class Container(DeclarativeContainer):
     diary_repository = Factory(DiaryRepositoryImpl)
     diary_meta_repository = Factory(DiaryMetaRepositoryImpl)
     tag_repository = Factory(TagRepositoryImpl)
+    reflection_repository = Factory(DiaryRepositoryImpl)
 
     """ Service """
 
@@ -53,6 +54,7 @@ class Container(DeclarativeContainer):
         diary_repo=diary_repository,
         diary_meta_repo=diary_meta_repository,
         tag_repo=tag_repository,
+        reflection_repo=reflection_repository,
     )
 
     """ Usecase """
