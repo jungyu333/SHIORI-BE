@@ -14,6 +14,7 @@ from shiori.app.diary.infra.repository import (
     DiaryRepositoryImpl,
     DiaryMetaRepositoryImpl,
     TagRepositoryImpl,
+    ReflectionRepositoryImpl,
 )
 from shiori.app.user.application.service import UserService
 from shiori.app.user.application.usecase import (
@@ -38,7 +39,7 @@ class Container(DeclarativeContainer):
     diary_repository = Factory(DiaryRepositoryImpl)
     diary_meta_repository = Factory(DiaryMetaRepositoryImpl)
     tag_repository = Factory(TagRepositoryImpl)
-    reflection_repository = Factory(DiaryRepositoryImpl)
+    reflection_repository = Factory(ReflectionRepositoryImpl)
 
     """ Service """
 
