@@ -9,7 +9,7 @@ from shiori.app.diary.infra.model import Reflection
 
 class ReflectionRepositoryImpl(ReflectionRepository):
 
-    async def upsert(self, *, reflection: ReflectionVO) -> int | None:
+    async def upsert(self, *, reflection: ReflectionVO) -> None:
 
         model = reflection.to_model()
 
@@ -20,7 +20,7 @@ class ReflectionRepositoryImpl(ReflectionRepository):
         except IntegrityError:
 
             await session.rollback()
-            result = await session.execute(
+            await session.execute(
                 update(Reflection)
                 .where(
                     Reflection.user_id == model.user_id,
@@ -28,8 +28,5 @@ class ReflectionRepositoryImpl(ReflectionRepository):
                     Reflection.end_date == model.end_date,
                 )
                 .values(summary_text=model.summary_text)
-                .returning(Reflection.id)
             )
-            reflection_id = result.scalar_one()
-
-            return reflection_id
+            await session.flush()
