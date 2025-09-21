@@ -7,7 +7,7 @@ from shiori.app.diary.infra.model import Reflection as Reflection_Model
 
 @dataclass
 class Reflection:
-
+    user_id: int
     start_date: str
     end_date: str
     summary_text: str
@@ -19,6 +19,7 @@ class Reflection:
     def from_model(cls, model: Reflection_Model) -> "Reflection":
         reflection = Reflection(
             id=model.id,
+            user_id=model.user_id,
             start_date=model.start_date,
             end_date=model.end_date,
             summary_text=model.summary_text,
@@ -28,9 +29,10 @@ class Reflection:
         return reflection
 
     def to_model(self) -> Reflection_Model:
-        tag = Reflection_Model(
+        reflection = Reflection_Model(
+            user_id=self.user_id,
             start_date=self.start_date,
             end_date=self.end_date,
             summary_text=self.summary_text,
         )
-        return tag
+        return reflection

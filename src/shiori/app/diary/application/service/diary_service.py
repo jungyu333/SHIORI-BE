@@ -2,11 +2,19 @@ from typing import Optional
 
 from shiori.app.core.database import MongoTransactional, Transactional
 from shiori.app.diary.domain.constants import REQUIRED_DAYS_FOR_SUMMARY
-from shiori.app.diary.domain.entity import DiaryBlockVO, DiaryVO, DiaryMetaVO, TagVO
+from shiori.app.diary.domain.entity import (
+    DiaryBlockVO,
+    DiaryVO,
+    DiaryMetaVO,
+    TagVO,
+    ReflectionVO,
+)
+from shiori.app.diary.domain.exception import SummarizeFailed
 from shiori.app.diary.domain.repository import (
     DiaryRepository,
     DiaryMetaRepository,
     TagRepository,
+    ReflectionRepository,
 )
 from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.domain.validator import DiaryMetaValidator
@@ -21,10 +29,12 @@ class DiaryService:
         diary_repo: DiaryRepository,
         diary_meta_repo: DiaryMetaRepository,
         tag_repo: TagRepository,
+        reflection_repo: ReflectionRepository,
     ):
         self._diary_repo = diary_repo
         self._diary_meta_repo = diary_meta_repo
         self._tag_repo = tag_repo
+        self._reflection_repo = reflection_repo
         self._adaptor = EmotionAdaptor()
         self._emotion_pipeline = EmotionPipeline(model=EmotionModel())
         self._summarize_pipeline = SummarizePipeline()
@@ -171,6 +181,20 @@ class DiaryService:
             status=status,
         )
 
+    @Transactional()
+    async def upsert_reflection(
+        self, *, reflection: str, user_id: int, start: str, end: str
+    ) -> None:
+
+        reflection_vo = ReflectionVO(
+            user_id=user_id,
+            start_date=start,
+            end_date=end,
+            summary_text=reflection,
+        )
+
+        await self._reflection_repo.upsert(reflection=reflection_vo)
+
     async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
 
         ## 7일치 diary get
@@ -198,8 +222,12 @@ class DiaryService:
 
             await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
 
-            summary_result = await self._summarize_pipeline.run(
+            reflection = await self._summarize_pipeline.run(
                 diaries=week_diary, emotions=emotion_results
+            )
+
+            await self.upsert_reflection(
+                user_id=user_id, reflection=reflection, start=start, end=end
             )
 
             await self.update_summary_status(
@@ -213,4 +241,5 @@ class DiaryService:
             await self.update_summary_status(
                 diary_meta_id=diary_meta_ids, status=SummaryStatus.failed
             )
-            return False
+
+            raise SummarizeFailed

@@ -10,11 +10,13 @@ from shiori.app.diary.domain.exception import (
     NotValidDateFormat,
     NotValidTitle,
     NotValidDateRange,
+    SummarizeFailed,
 )
 from shiori.app.diary.domain.repository import (
     DiaryRepository,
     DiaryMetaRepository,
     TagRepository,
+    ReflectionRepository,
 )
 from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.infra.model import ProseMirror
@@ -36,13 +38,22 @@ def tag_repository_mock():
 
 
 @pytest.fixture
+def reflection_repository_mock():
+    return AsyncMock(spec=ReflectionRepository)
+
+
+@pytest.fixture
 def diary_service(
-    diary_repository_mock, diary_meta_repository_mock, tag_repository_mock
+    diary_repository_mock,
+    diary_meta_repository_mock,
+    tag_repository_mock,
+    reflection_repository_mock,
 ):
     return DiaryService(
         diary_repo=diary_repository_mock,
         diary_meta_repo=diary_meta_repository_mock,
         tag_repo=tag_repository_mock,
+        reflection_repo=reflection_repository_mock,
     )
 
 
@@ -750,6 +761,57 @@ async def test_summarize_diary(
 
     # Then
     assert result == True
+
+
+@pytest.mark.asyncio
+async def test_summarize_diary_llm_failure(
+    diary_repository_mock,
+    tag_repository_mock,
+    reflection_repository_mock,
+    diary_service,
+):
+    # Given
+    user_id = 1
+    start_date = "20250810"
+    end_date = "20250816"
+
+    diary_vo_mock = AsyncMock(spec=DiaryVO)
+    diary_vo_mock.diary_meta_id = "dummy_diary_meta_id"
+    diary_vo_mock.diary_blocks = [
+        DiaryBlockVO(
+            order=0,
+            type="paragraph",
+            content="hello",
+            textAlign="left",
+            marks=["bold"],
+        )
+    ]
+
+    diary_repository_mock.get_diary_by_date_range.return_value = [diary_vo_mock] * 7
+    tag_repository_mock.upsert.return_value = None
+
+    diary_service._adaptor.convert_week = AsyncMock(return_value=["dummy"] * 7)
+    diary_service._emotion_pipeline.analyze = AsyncMock(
+        return_value=[
+            EmotionResult(predicted="행복", probabilities={"행복": 0.9, "슬픔": 0.1})
+        ]
+        * 7
+    )
+
+    diary_service._summarize_pipeline.run = AsyncMock(
+        side_effect=Exception("LLM error")
+    )
+
+    # When, Then
+    with pytest.raises(SummarizeFailed) as e:
+        await diary_service.summarize_diary(
+            user_id=user_id,
+            start=start_date,
+            end=end_date,
+        )
+
+    assert e.value.code == 503
+    assert e.value.message == "요약 처리에 실패했습니다. 잠시 후 다시 시도해주세요."
 
 
 async def test_summarize_diary_return_none_diary(diary_repository_mock, diary_service):
