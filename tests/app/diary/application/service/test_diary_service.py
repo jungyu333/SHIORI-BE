@@ -731,6 +731,15 @@ async def test_summarize_diary(
 
     tag_repository_mock.upsert.return_value = None
 
+    diary_service._emotion_pipeline.analyze = AsyncMock()
+    diary_service._emotion_pipeline.analyze.return_value = [
+        EmotionResult(predicted="행복", probabilities={"행복": 0.9, "슬픔": 0.1})
+    ] * 7
+
+    diary_service._adaptor.convert_week = AsyncMock(return_value=["dummy"] * 7)
+    diary_service._summarize_pipeline.run = AsyncMock()
+    diary_service._summarize_pipeline.return_value = "dummy_value"
+
     # When
 
     result = await diary_service.summarize_diary(
@@ -803,20 +812,20 @@ async def test_upsert_diary_tag(tag_repository_mock, diary_service):
 
     tag_repository_mock.upsert.return_value = None
 
-    emotion_mock = AsyncMock(spec=EmotionResult)
-
-    emotion_mock.predicted = "행복"
-    emotion_mock.probabilities = {
-        "공포": 0.0,
-        "놀람": 0.0,
-        "분노": 0.0,
-        "슬픔": 0.0,
-        "중립": 0.0,
-        "행복": 1.0,
-        "혐오": 0.0,
-    }
-
-    emotion_props = [emotion_mock] * 7
+    emotion_props = [
+        EmotionResult(
+            predicted="행복",
+            probabilities={
+                "공포": 0.0,
+                "놀람": 0.0,
+                "분노": 0.0,
+                "슬픔": 0.0,
+                "중립": 0.0,
+                "행복": 1.0,
+                "혐오": 0.0,
+            },
+        )
+    ] * 7
 
     # When
 
