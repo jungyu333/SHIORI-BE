@@ -9,6 +9,7 @@ from shiori.app.diary.domain.entity import (
     TagVO,
     ReflectionVO,
 )
+from shiori.app.diary.domain.exception import SummarizeFailed
 from shiori.app.diary.domain.repository import (
     DiaryRepository,
     DiaryMetaRepository,
@@ -240,4 +241,5 @@ class DiaryService:
             await self.update_summary_status(
                 diary_meta_id=diary_meta_ids, status=SummaryStatus.failed
             )
-            return False
+
+            raise SummarizeFailed
