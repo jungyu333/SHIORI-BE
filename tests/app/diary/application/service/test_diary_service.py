@@ -5,7 +5,12 @@ import pytest
 from pymongo.errors import PyMongoError
 
 from shiori.app.diary.application.service import DiaryService
-from shiori.app.diary.domain.entity import DiaryVO, DiaryBlockVO, DiaryMetaVO
+from shiori.app.diary.domain.entity import (
+    DiaryVO,
+    DiaryBlockVO,
+    DiaryMetaVO,
+    ReflectionVO,
+)
 from shiori.app.diary.domain.exception import (
     NotValidDateFormat,
     NotValidTitle,
@@ -899,3 +904,43 @@ async def test_upsert_diary_tag(tag_repository_mock, diary_service):
 
     assert result is None
     assert tag_repository_mock.upsert.call_count == len(diary_vo_list)
+
+
+@pytest.mark.asyncio
+async def test_get_reflection(diary_service, reflection_repository_mock):
+    # Given
+
+    user_id = 1
+    start_date = "20250811"
+    end_date = "20250817"
+    summary_text = "summary_text"
+
+    reflection_mock = ReflectionVO(
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+        summary_text=summary_text,
+    )
+
+    reflection_repository_mock.get.return_value = reflection_mock
+
+    # When
+
+    result = await diary_service.get_reflection(
+        user_id=user_id,
+        start=start_date,
+        end=end_date,
+    )
+
+    # Then
+    assert result is not None
+    assert result.user_id == user_id
+    assert result.start_date == start_date
+    assert result.end_date == end_date
+    assert result.summary_text == summary_text
+
+    reflection_repository_mock.get.assert_awaited_once_with(
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+    )
