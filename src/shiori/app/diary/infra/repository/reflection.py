@@ -1,4 +1,4 @@
-from sqlalchemy import update
+from sqlalchemy import update, select
 from sqlalchemy.exc import IntegrityError
 
 from shiori.app.core.database import session
@@ -30,3 +30,19 @@ class ReflectionRepositoryImpl(ReflectionRepository):
                 .values(summary_text=model.summary_text)
             )
             await session.flush()
+
+    async def get(
+        self, *, user_id: int, start_date: str, end_date: str
+    ) -> ReflectionVO | None:
+
+        stmt = select(Reflection).where(
+            Reflection.user_id == user_id,
+            Reflection.start_date == start_date,
+            Reflection.end_date == end_date,
+        )
+
+        result = await session.execute(stmt)
+
+        reflection = result.scalar_one_or_none()
+
+        return ReflectionVO.from_model(reflection) if reflection else None
