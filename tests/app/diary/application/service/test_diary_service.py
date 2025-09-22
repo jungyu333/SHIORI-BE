@@ -944,3 +944,25 @@ async def test_get_reflection(diary_service, reflection_repository_mock):
         start_date=start_date,
         end_date=end_date,
     )
+
+
+@pytest.mark.asyncio
+async def test_get_reflection_invalid_date_format(
+    diary_service, reflection_repository_mock
+):
+    # Given
+    user_id = 1
+    invalid_start_date = "2025-08-11"
+    end_date = "20250817"
+
+    # When, Then
+    with pytest.raises(NotValidDateFormat) as e:
+        await diary_service.get_reflection(
+            user_id=user_id,
+            start=invalid_start_date,
+            end=end_date,
+        )
+
+    assert e.value.message == "잘못된 날짜 형식이에요."
+    assert e.value.code == 422
+    assert reflection_repository_mock.get.call_count == 0
