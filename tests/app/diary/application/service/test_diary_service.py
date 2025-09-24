@@ -947,6 +947,33 @@ async def test_get_reflection(diary_service, reflection_repository_mock):
 
 
 @pytest.mark.asyncio
+async def test_get_reflection_none(diary_service, reflection_repository_mock):
+    # Given
+
+    user_id = 1
+    start_date = "20250811"
+    end_date = "20250817"
+
+    reflection_repository_mock.get.return_value = None
+
+    # When
+
+    result = await diary_service.get_reflection(
+        user_id=user_id,
+        start=start_date,
+        end=end_date,
+    )
+
+    # Then
+    assert result is None
+    reflection_repository_mock.get.assert_awaited_once_with(
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+
+@pytest.mark.asyncio
 async def test_get_reflection_invalid_date_format(
     diary_service, reflection_repository_mock
 ):
