@@ -1,0 +1,111 @@
+name: Auto PR Settings
+
+on:
+  pull_request:
+    types: [ opened ]
+
+jobs:
+  update-pr-body:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Extract Issue Number from Branch Name
+        id: extract_issue
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | grep -oE '[0-9]+' | head -n1)
+          if [[ -n "$ISSUE_NUMBER" ]]; then
+            echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+          fi
+
+      - name: Update PR Description with Issue Number
+        if: env.ISSUE_NUMBER != ''
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = process.env.ISSUE_NUMBER;
+            const pr = context.payload.pull_request;
+            let body = pr.body || '';
+            
+            const issueSectionHeader = "## Linked Issue";
+            const issueReference = `close #${issueNumber}`;
+
+            if (body.includes(issueSectionHeader)) {
+              const newBody = body.replace(issueSectionHeader, `${issueSectionHeader}\n\n${issueReference}`);
+              if (newBody !== body) {
+                github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  body: newBody
+                });
+              }
+            }
+
+      - name: Assign Labels from Issue
+        if: env.ISSUE_NUMBER != ''
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = process.env.ISSUE_NUMBER;
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            const issue = await github.rest.issues.get({
+              owner,
+              repo,
+              issue_number: issueNumber
+            });
+
+            const validLabels = ['bug', 'chore', 'enhancement'];
+            const issueLabels = issue.data.labels.map(label => label.name);
+            const labelsToApply = issueLabels.filter(label => validLabels.includes(label));
+
+            if (labelsToApply.length > 0) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: prNumber,
+                labels: labelsToApply
+              });
+
+              console.log(`✅ Labels ${labelsToApply.join(', ')} assigned to PR #${prNumber}`);
+            } else {
+              console.log(`⚠️ No valid labels found for issue #${issueNumber}`);
+            }
+
+      - name: Assign Assignees from Issue
+        if: env.ISSUE_NUMBER != ''
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = process.env.ISSUE_NUMBER;
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            const issue = await github.rest.issues.get({
+              owner,
+              repo,
+              issue_number: issueNumber
+            });
+
+            const assignees = issue.data.assignees.map(user => user.login);
+
+            if (assignees.length > 0) {
+              await github.rest.issues.addAssignees({
+                owner,
+                repo,
+                issue_number: prNumber,
+                assignees: assignees
+              });
+
+              console.log(`✅ Assignees ${assignees.join(', ')} added to PR #${prNumber}`);
+            } else {
+              console.log(`⚠️ No assignees found for issue #${issueNumber}`);
+            }

@@ -1,5 +1,5 @@
 name: ✨ Feature Request
-description: "Template for proposing a new feature to the SDK."
+description: "Template for proposing a new feature."
 title: "[Feature] Enter a concise feature title"
 labels: ["enhancement"]
 body:
