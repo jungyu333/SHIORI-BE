@@ -9,6 +9,7 @@ from shiori.app.diary.application.usecase import (
     GetDiary,
     GetWeekDiaryMeta,
     CreateSummarize,
+    GetReflection,
 )
 from shiori.app.diary.infra.repository import (
     DiaryRepositoryImpl,
@@ -72,3 +73,4 @@ class Container(DeclarativeContainer):
     get_diary = Factory(GetDiary, diary_service=diary_service)
     get_week_diary_meta = Factory(GetWeekDiaryMeta, diary_service=diary_service)
     create_summarize = Factory(CreateSummarize, diary_service=diary_service)
+    get_reflection = Factory(GetReflection, diary_service=diary_service)

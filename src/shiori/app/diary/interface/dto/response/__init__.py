@@ -15,3 +15,7 @@ class WeekDiaryMeta(BaseModel):
     summary_status: str
     is_archived: bool
     updated_at: str
+
+
+class GetReflectionResponse(BaseModel):
+    reflection: str = Field(..., description="Refraction Diary")

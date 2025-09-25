@@ -243,3 +243,18 @@ class DiaryService:
             )
 
             raise SummarizeFailed
+
+    async def get_reflection(
+        self, *, user_id: int, start: str, end: str
+    ) -> ReflectionVO | None:
+
+        DiaryMetaValidator.validate_date_format(start)
+        DiaryMetaValidator.validate_date_format(end)
+
+        DiaryMetaValidator.validate_date_range(start=start, end=end)
+
+        reflection = await self._reflection_repo.get(
+            user_id=user_id, start_date=start, end_date=end
+        )
+
+        return reflection

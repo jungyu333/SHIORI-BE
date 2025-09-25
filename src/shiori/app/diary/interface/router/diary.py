@@ -11,6 +11,7 @@ from shiori.app.diary.application.usecase import (
     GetDiary,
     GetWeekDiaryMeta,
     CreateSummarize,
+    GetReflection,
 )
 from shiori.app.diary.interface.dto import (
     UpsertDiaryRequest,
@@ -18,9 +19,39 @@ from shiori.app.diary.interface.dto import (
     GetDiaryResponse,
     WeekDiaryMeta,
     SummarizeDiaryRequest,
+    GetReflectionResponse,
 )
 
 router = APIRouter()
+
+
+@router.get(
+    "/reflections",
+    response_model=StandardResponse[GetReflectionResponse],
+    dependencies=[Depends(PermissionDependency([IsAuthenticated]))],
+)
+@inject
+async def get_reflections(
+    start: Annotated[str, Query(..., description="시작 날짜 (예: 20250810)")],
+    end: Annotated[str, Query(..., description="끝 날짜 (예: 20250816)")],
+    request: Request,
+    use_case: GetReflection = Depends(Provide[Container.get_reflection]),
+):
+
+    user_id = request.user.id
+    result = await use_case.execute(
+        user_id=user_id,
+        start_date=start,
+        end_date=end,
+    )
+
+    response = GetReflectionResponse(reflection=result.summary_text) if result else None
+
+    return {
+        "code": 200,
+        "message": "",
+        "data": response,
+    }
 
 
 @router.post(
