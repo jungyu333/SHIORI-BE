@@ -1,4 +1,4 @@
-## 🔗 Linked Issue
+## Linked Issue
 <!-- `close #issue_number` will be added automatically if configured. -->
 <!-- Or manually add like: close #123 -->
 
