@@ -1,0 +1,17 @@
+name: ✨ Feature Request
+description: "Template for proposing a new feature to the SDK."
+title: "[Feature] Enter a concise feature title"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: "## 🚀 Feature Overview\nPlease provide a brief summary of the feature you'd like to request."
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: "Feature Description"
+      description: "Describe in detail what functionality you'd like to add to the SDK."
+      placeholder: "e.g. Add a new anomaly detector that supports multivariate sensor data for more accurate diagnostics."
+    validations:
+      required: true
