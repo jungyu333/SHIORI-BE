@@ -1,7 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
+from shiori.app.diary.domain.entity import ReflectionVO
 from shiori.app.server import app
+from shiori.app.user.domain.entity import UserVO
 from shiori.app.utils.helpers import TokenHelper
 
 BASE_URL = "http://test"
@@ -440,3 +442,55 @@ async def test_summarize_diary_invalid_date_range(access_token_mock):
     assert response.json().get("code") == 400
     assert response.json().get("message") == "시작 날짜와 끝 날짜가 유효하지 않아요!"
     assert response.json().get("data") is None
+
+
+@pytest.mark.asyncio
+async def test_get_reflections(access_token_mock, session):
+    # Given
+
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    user_id = 1
+    start_date = "20250810"
+    end_date = "20250816"
+    summary_text = "dummy summary"
+
+    reflection = ReflectionVO(
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+        summary_text=summary_text,
+    )
+
+    user = UserVO(
+        id=1,
+        nickname="test_user",
+        email="test@example.com",
+        password="hashed_pw",
+        is_admin=False,
+    )
+
+    session.add(user.to_model())
+
+    await session.commit()
+
+    model = reflection.to_model()
+
+    session.add(model)
+
+    await session.commit()
+
+    start_date = "20250810"
+    end_date = "20250816"
+
+    # When
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.get(
+            f"/api/diary/reflections?start={start_date}&end={end_date}"
+        )
+
+    # Then
+    assert response.json().get("code") == 200
+    assert response.json().get("message") == ""
+    assert response.json().get("data").get("reflection") == summary_text
