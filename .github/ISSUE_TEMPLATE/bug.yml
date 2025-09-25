@@ -1,0 +1,17 @@
+name: 🧑‍💻 Bug Report
+description: "Template for reporting a bug in the SDK."
+title: "[Bug] Enter a concise bug title"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "## 🐞 Bug Fix\nPlease provide a brief summary of the bug you are trying to fix."
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: "Bug Description"
+      description: "Describe in detail the bug you encountered or are addressing."
+      placeholder: "e.g. Fix an issue where sensor data is not properly loaded into the processing pipeline."
+    validations:
+      required: true
