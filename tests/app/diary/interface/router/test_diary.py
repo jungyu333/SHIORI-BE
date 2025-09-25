@@ -516,3 +516,26 @@ async def test_get_reflections_invalid_date_format(access_token_mock):
     assert response.json().get("code") == 422
     assert response.json().get("message") == "잘못된 날짜 형식이에요."
     assert response.json().get("data") is None
+
+
+@pytest.mark.asyncio
+async def test_get_reflections_invalid_date_range(access_token_mock):
+    # Given
+
+    access_token = access_token_mock
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    start_date = "20250816"
+    end_date = "20250810"
+
+    # When
+
+    async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
+        response = await client.get(
+            f"/api/diary/reflections?start={start_date}&end={end_date}"
+        )
+
+    # Then
+    assert response.json().get("code") == 400
+    assert response.json().get("message") == "시작 날짜와 끝 날짜가 유효하지 않아요!"
+    assert response.json().get("data") is None
