@@ -1,5 +1,5 @@
 name: 🧑‍💻 Bug Report
-description: "Template for reporting a bug in the SDK."
+description: "Template for reporting a bug."
 title: "[Bug] Enter a concise bug title"
 labels: ["bug"]
 body:
