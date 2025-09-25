@@ -1,0 +1,17 @@
+name: 🔧 Chore Request
+description: "Issue template for maintenance tasks such as refactoring, documentation updates, or internal improvements."
+title: "[Chore] Enter a descriptive task title"
+labels: ["chore"]
+body:
+  - type: markdown
+    attributes:
+      value: "## 🔧 Chore Task\nPlease provide a brief summary of the maintenance or internal task you'd like to perform."
+
+  - type: textarea
+    id: chore-description
+    attributes:
+      label: "Chore Description"
+      description: "Describe in detail the maintenance or internal work to be done."
+      placeholder: "e.g. Refactor pipeline execution logic and remove redundant log statements."
+    validations:
+      required: true
