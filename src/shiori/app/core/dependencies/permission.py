@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Type
 
 from fastapi import Request
-from fastapi.openapi.models import APIKey, APIKeyIn
+from fastapi.openapi.models import HTTPBearer
 from fastapi.security.base import SecurityBase
 
 from shiori.app.core.exceptions import BaseCustomException, UnauthorizedException
@@ -45,7 +45,7 @@ class AllowAll(BasePermission):
 class PermissionDependency(SecurityBase):
     def __init__(self, permissions: list[Type[BasePermission]]):
         self.permissions = permissions
-        self.model: APIKey = APIKey(**{"in": APIKeyIn.header}, name="Authorization")
+        self.model: HTTPBearer = HTTPBearer(bearerFormat="JWT")
         self.scheme_name = self.__class__.__name__
 
     async def __call__(self, request: Request):
