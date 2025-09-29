@@ -19,6 +19,7 @@ class DiaryMetaDocument(Document, MongoTimestampMixin):
 
     summary_status: SummaryStatus = SummaryStatus.pending
     is_archived: bool = False
+    version: int = 1
 
     class Settings:
         name = "diary-meta"

@@ -10,6 +10,7 @@ class DiaryMeta:
     user_id: int
     date: str
     title: str = ""
+    version: int = 1
     summary_status: SummaryStatus = SummaryStatus.pending
     is_archived: bool = False
     id: Optional[str] = None
@@ -36,6 +37,7 @@ class DiaryMeta:
             date=model.date,
             title=model.title,
             summary_status=model.summary_status,
+            version=model.version,
             is_archived=model.is_archived,
             created_at=model.created_at,
             updated_at=model.updated_at,
@@ -47,6 +49,7 @@ class DiaryMeta:
             user_id=self.user_id,
             date=self.date,
             title=self.title,
+            version=self.version,
             summary_status=self.summary_status,
             is_archived=self.is_archived,
         )
