@@ -100,12 +100,14 @@ async def upsert_diary(
 
     content = body.content
     title = body.title
+    version = body.version
 
     user_id = request.user.id
 
     diary_id, is_created = await use_case.execute(
         date=date,
         user_id=user_id,
+        version=version,
         content=content,
         title=title,
     )
