@@ -86,7 +86,7 @@ class DiaryService:
         )
 
         if not diary_meta_id:
-            raise ConflictDiary("DiaryMeta was updated by another transaction")
+            raise ConflictDiary
 
         return diary_meta_id
 
