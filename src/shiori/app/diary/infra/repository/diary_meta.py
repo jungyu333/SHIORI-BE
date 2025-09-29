@@ -1,4 +1,4 @@
-from beanie.operators import And, Set, In
+from beanie.operators import And, Set, In, Inc
 from bson import ObjectId
 
 from shiori.app.core.database.mongo_session import get_mongo_session
@@ -9,7 +9,7 @@ from shiori.app.diary.infra.model import DiaryMetaDocument, SummaryStatus
 
 class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
-    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> str:
+    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> str | None:
 
         session = get_mongo_session()
 
@@ -19,13 +19,29 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
             session=session,
         )
 
-        diary_meta_document = diary_meta.to_model()
-
         if existing_meta:
-            diary_meta_document.id = existing_meta.id
-            await diary_meta_document.replace(session=session)
+            result = DiaryMetaDocument.find_one(
+                DiaryMetaDocument.id == existing_meta.id,
+                DiaryMetaDocument.version == existing_meta.version,
+                session=session,
+            ).update(
+                Set(
+                    {
+                        DiaryMetaDocument.title: diary_meta.title,
+                        DiaryMetaDocument.summary_status: diary_meta.summary_status,
+                        DiaryMetaDocument.is_archived: diary_meta.is_archived,
+                    }
+                ),
+                Inc({DiaryMetaDocument.version: 1}),
+            )
+
+            if result.matched_count == 0:
+
+                return None
+
             return str(existing_meta.id)
 
+        diary_meta_document = diary_meta.to_model()
         await diary_meta_document.insert(session=session)
         return str(diary_meta_document.id)
 
