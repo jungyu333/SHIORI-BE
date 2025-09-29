@@ -10,6 +10,7 @@ from shiori.app.diary.infra.repository import (
     DiaryRepositoryImpl,
     DiaryMetaRepositoryImpl,
     TagRepositoryImpl,
+    ReflectionRepositoryImpl,
 )
 
 
@@ -147,6 +148,7 @@ async def seed(user_id: int, start: datetime, end: datetime) -> None:
         diary_repo=DiaryRepositoryImpl(),
         diary_meta_repo=DiaryMetaRepositoryImpl(),
         tag_repo=TagRepositoryImpl(),
+        reflection_repo=ReflectionRepositoryImpl(),
     )
 
     d = start
@@ -162,6 +164,7 @@ async def seed(user_id: int, start: datetime, end: datetime) -> None:
             user_id=user_id,
             date=date_str,
             content=content,
+            version=1,
             title=title,
         )
 
