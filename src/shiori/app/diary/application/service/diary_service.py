@@ -9,7 +9,7 @@ from shiori.app.diary.domain.entity import (
     TagVO,
     ReflectionVO,
 )
-from shiori.app.diary.domain.exception import SummarizeFailed
+from shiori.app.diary.domain.exception import SummarizeFailed, ConflictDiary
 from shiori.app.diary.domain.repository import (
     DiaryRepository,
     DiaryMetaRepository,
@@ -63,7 +63,12 @@ class DiaryService:
         return diary_document_id, is_created
 
     async def save_diary_meta(
-        self, *, user_id: int, date: str, title: str
+        self,
+        *,
+        user_id: int,
+        date: str,
+        title: str,
+        version: int,
     ) -> str | None:
 
         DiaryMetaValidator.validate_date_format(date)
@@ -73,11 +78,15 @@ class DiaryService:
             user_id=user_id,
             date=date,
             title=title,
+            version=version,
         )
 
         diary_meta_id = await self._diary_meta_repo.save_diary_meta(
             diary_meta=diary_meta_vo
         )
+
+        if not diary_meta_id:
+            raise ConflictDiary("DiaryMeta was updated by another transaction")
 
         return diary_meta_id
 
@@ -87,12 +96,13 @@ class DiaryService:
         *,
         user_id: int,
         date: str,
+        version: int,
         content: ProseMirror,
         title: Optional[str] = "",
     ) -> tuple[str | None, bool | None]:
 
         diary_meta_id = await self.save_diary_meta(
-            user_id=user_id, date=date, title=title
+            user_id=user_id, date=date, title=title, version=version
         )
 
         if diary_meta_id:
