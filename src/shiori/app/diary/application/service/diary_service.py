@@ -69,7 +69,7 @@ class DiaryService:
         user_id: int,
         date: str,
         title: str,
-        version: int,
+        version: Optional[int],
     ) -> str | None:
 
         DiaryMetaValidator.validate_date_format(date)

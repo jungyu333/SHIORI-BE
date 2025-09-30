@@ -20,7 +20,7 @@ async def test_execute(diary_service_mock):
     user_id = 1
     date = "20250728"
     title = "dummy_title"
-
+    version = None
     diary_content_dict = {
         "type": "doc",
         "content": [
@@ -43,7 +43,7 @@ async def test_execute(diary_service_mock):
     # When
 
     diary_id, is_created = await use_case.execute(
-        user_id=user_id, date=date, content=content, title=title
+        user_id=user_id, date=date, content=content, title=title, version=version
     )
 
     # Then
@@ -51,5 +51,5 @@ async def test_execute(diary_service_mock):
     assert is_created
     assert diary_id is not None
     diary_service_mock.upsert_diary.assert_awaited_with(
-        user_id=user_id, date=date, content=content, title=title
+        user_id=user_id, date=date, content=content, title=title, version=version
     )
