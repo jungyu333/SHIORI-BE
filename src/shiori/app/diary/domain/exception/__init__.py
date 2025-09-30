@@ -29,3 +29,12 @@ class SummarizeFailed(BaseCustomException):
         data: None = None,
     ):
         super().__init__(code=503, message=message, data=data)
+
+
+class ConflictDiary(BaseCustomException):
+    def __init__(
+        self,
+        message: str = "잠시 후 다시 시도해주세요.",
+        data: None = None,
+    ):
+        super().__init__(code=409, message=message, data=data)

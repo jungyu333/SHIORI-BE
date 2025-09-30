@@ -1,5 +1,6 @@
-from beanie.operators import And, Set, In
+from beanie.operators import And, Set, In, Inc
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 
 from shiori.app.core.database.mongo_session import get_mongo_session
 from shiori.app.diary.domain.entity import DiaryMetaVO
@@ -9,25 +10,45 @@ from shiori.app.diary.infra.model import DiaryMetaDocument, SummaryStatus
 
 class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
-    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> str:
+    async def save_diary_meta(self, *, diary_meta: DiaryMetaVO) -> str | None:
 
         session = get_mongo_session()
 
-        existing_meta = await DiaryMetaDocument.find_one(
-            DiaryMetaDocument.user_id == diary_meta.user_id,
-            DiaryMetaDocument.date == diary_meta.date,
-            session=session,
-        )
+        if diary_meta.version is not None:
 
-        diary_meta_document = diary_meta.to_model()
+            result = await DiaryMetaDocument.find_one(
+                DiaryMetaDocument.user_id == diary_meta.user_id,
+                DiaryMetaDocument.date == diary_meta.date,
+                DiaryMetaDocument.version == diary_meta.version,
+                session=session,
+            ).update(
+                Set(
+                    {
+                        DiaryMetaDocument.title: diary_meta.title,
+                        DiaryMetaDocument.summary_status: diary_meta.summary_status,
+                        DiaryMetaDocument.is_archived: diary_meta.is_archived,
+                    }
+                ),
+                Inc({DiaryMetaDocument.version: 1}),
+            )
 
-        if existing_meta:
-            diary_meta_document.id = existing_meta.id
-            await diary_meta_document.replace(session=session)
-            return str(existing_meta.id)
+            if result.matched_count == 0:
 
-        await diary_meta_document.insert(session=session)
-        return str(diary_meta_document.id)
+                return None
+
+            found = await DiaryMetaDocument.find_one(
+                DiaryMetaDocument.user_id == diary_meta.user_id,
+                DiaryMetaDocument.date == diary_meta.date,
+                session=session,
+            )
+            return str(found.id)
+
+        try:
+            diary_meta_document = diary_meta.to_model()
+            await diary_meta_document.insert(session=session)
+            return str(diary_meta_document.id)
+        except DuplicateKeyError:
+            return None
 
     async def get_diary_meta_by_date_range(
         self, *, user_id: int, start_date: str, end_date: str

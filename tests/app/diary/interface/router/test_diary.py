@@ -60,6 +60,7 @@ async def test_upsert_diary_update(access_token_mock):
     access_token = access_token_mock
 
     date = "20250728"
+    version = 1
     content = {
         "type": "doc",
         "content": [
@@ -79,14 +80,14 @@ async def test_upsert_diary_update(access_token_mock):
         "content": content,
         "title": title,
     }
-
+    body2 = {"content": content, "title": title, "version": version}
     # When
     headers = {"Authorization": f"Bearer {access_token}"}
     async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
         response = await client.post(f"/api/diary/{date}", json=body)
 
     async with AsyncClient(app=app, base_url=BASE_URL, headers=headers) as client:
-        response = await client.post(f"/api/diary/{date}", json=body)
+        response = await client.post(f"/api/diary/{date}", json=body2)
 
     # Then
     assert response.json().get("code") == 200

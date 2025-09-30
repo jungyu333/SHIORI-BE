@@ -143,21 +143,19 @@ async def test_save_diary_meta(
     user_id = 1
     date = "20250728"
     title = "dummy_title"
-
-    diary_meta_repository_mock.save_diary_meta.return_value = None
+    version = None
+    diary_meta_repository_mock.save_diary_meta.return_value = "1"
 
     # When
 
     response = await diary_service.save_diary_meta(
-        user_id=user_id,
-        date=date,
-        title=title,
+        user_id=user_id, date=date, title=title, version=version
     )
 
     # Then
 
     assert diary_meta_repository_mock.save_diary_meta.call_count == 1
-    assert response is None
+    assert response is "1"
 
 
 @pytest.mark.asyncio
@@ -169,6 +167,7 @@ async def test_save_diary_meta_invalid_date_format(
     user_id = 1
     date = "2025-07-28"
     title = "dummy_title"
+    version = 1
 
     diary_meta_repository_mock.save_diary_meta.return_value = None
 
@@ -176,9 +175,7 @@ async def test_save_diary_meta_invalid_date_format(
 
     with pytest.raises(NotValidDateFormat) as e:
         await diary_service.save_diary_meta(
-            user_id=user_id,
-            date=date,
-            title=title,
+            user_id=user_id, date=date, title=title, version=version
         )
 
     assert str(e.value.message) == "잘못된 날짜 형식이에요."
@@ -194,6 +191,7 @@ async def test_save_diary_meta_invalid_title(
     user_id = 1
     date = "20250728"
     title = "a" * 51
+    version = 1
 
     diary_meta_repository_mock.save_diary_meta.return_value = None
 
@@ -204,6 +202,7 @@ async def test_save_diary_meta_invalid_title(
             user_id=user_id,
             date=date,
             title=title,
+            version=version,
         )
 
     assert str(e.value.message) == "일지 제목은 50자 이내로 작성 해 주세요."
@@ -220,7 +219,7 @@ async def test_upsert_diary(
     user_id = 1
     date = "20250728"
     title = "dummy_title"
-
+    version = 1
     diary_content_dict = {
         "type": "doc",
         "content": [
@@ -246,6 +245,7 @@ async def test_upsert_diary(
         date=date,
         content=content,
         title=title,
+        version=version,
     )
 
     # Then
@@ -258,51 +258,6 @@ async def test_upsert_diary(
 
 @pytest.mark.asyncio
 @pytest.mark.mongo
-async def test_upsert_diary_raises_save_diary_meta(
-    diary_repository_mock, diary_meta_repository_mock, diary_service
-):
-    # Given
-    user_id = 1
-    date = "20250728"
-    title = "dummy_title"
-
-    diary_content_dict = {
-        "type": "doc",
-        "content": [
-            {
-                "type": "paragraph",
-                "attrs": {"textAlign": "left"},
-                "content": [
-                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
-                ],
-            }
-        ],
-    }
-
-    content = ProseMirror(**diary_content_dict)
-
-    diary_repository_mock.save_diary.return_value = "mock_diary_id", True
-    diary_meta_repository_mock.save_diary_meta.return_value = None
-
-    # When
-
-    diary_id, is_created = await diary_service.upsert_diary(
-        user_id=user_id,
-        date=date,
-        content=content,
-        title=title,
-    )
-
-    # Then
-
-    assert diary_repository_mock.save_diary.call_count == 0
-    assert diary_meta_repository_mock.save_diary_meta.call_count == 1
-    assert diary_id is None
-    assert is_created is None
-
-
-@pytest.mark.asyncio
-@pytest.mark.mongo
 async def test_upsert_diary_invalid_date_format(
     diary_repository_mock, diary_meta_repository_mock, diary_service
 ):
@@ -310,6 +265,7 @@ async def test_upsert_diary_invalid_date_format(
     user_id = 1
     date = "2025-07-28"
     title = "dummy_title"
+    version = 1
 
     diary_content_dict = {
         "type": "doc",
@@ -337,6 +293,7 @@ async def test_upsert_diary_invalid_date_format(
             date=date,
             content=content,
             title=title,
+            version=version,
         )
 
     assert str(e.value.message) == "잘못된 날짜 형식이에요."

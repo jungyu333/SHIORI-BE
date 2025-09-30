@@ -28,6 +28,7 @@ class UpsertDiaryRequest(BaseModel):
         ],
     )
     title: Optional[str] = Field(..., examples=["오늘의 일지"])
+    version: Optional[int] = Field(None, examples=[1])
 
 
 class SummarizeDiaryRequest(BaseModel):

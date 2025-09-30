@@ -7,7 +7,7 @@ from shiori.app.diary.infra.model import SummaryStatus
 class DiaryMetaRepository(ABC):
 
     @abstractmethod
-    async def save_diary_meta(self, diary_meta: DiaryMetaVO) -> str:
+    async def save_diary_meta(self, diary_meta: DiaryMetaVO) -> str | None:
         pass
 
     @abstractmethod
