@@ -1,5 +1,6 @@
 from beanie.operators import And, Set, In, Inc
 from bson import ObjectId
+from pymongo.errors import DuplicateKeyError
 
 from shiori.app.core.database.mongo_session import get_mongo_session
 from shiori.app.diary.domain.entity import DiaryMetaVO
@@ -13,16 +14,12 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
         session = get_mongo_session()
 
-        existing_meta = await DiaryMetaDocument.find_one(
-            DiaryMetaDocument.user_id == diary_meta.user_id,
-            DiaryMetaDocument.date == diary_meta.date,
-            session=session,
-        )
+        if diary_meta.version is not None:
 
-        if existing_meta:
-            result = DiaryMetaDocument.find_one(
-                DiaryMetaDocument.id == existing_meta.id,
-                DiaryMetaDocument.version == existing_meta.version,
+            result = await DiaryMetaDocument.find_one(
+                DiaryMetaDocument.user_id == diary_meta.user_id,
+                DiaryMetaDocument.date == diary_meta.date,
+                DiaryMetaDocument.version == diary_meta.version,
                 session=session,
             ).update(
                 Set(
@@ -39,11 +36,19 @@ class DiaryMetaRepositoryImpl(DiaryMetaRepository):
 
                 return None
 
-            return str(existing_meta.id)
+            found = await DiaryMetaDocument.find_one(
+                DiaryMetaDocument.user_id == diary_meta.user_id,
+                DiaryMetaDocument.date == diary_meta.date,
+                session=session,
+            )
+            return str(found.id)
 
-        diary_meta_document = diary_meta.to_model()
-        await diary_meta_document.insert(session=session)
-        return str(diary_meta_document.id)
+        try:
+            diary_meta_document = diary_meta.to_model()
+            await diary_meta_document.insert(session=session)
+            return str(diary_meta_document.id)
+        except DuplicateKeyError:
+            return None
 
     async def get_diary_meta_by_date_range(
         self, *, user_id: int, start_date: str, end_date: str
