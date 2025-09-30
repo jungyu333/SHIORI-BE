@@ -13,8 +13,8 @@ class UpsertDiary:
         *,
         user_id: int,
         date: str,
-        version: int,
         content: ProseMirror,
+        version: Optional[int],
         title: Optional[str] = "",
     ) -> tuple[str | None, bool | None]:
         diary_id, is_created = await self._diary_service.upsert_diary(

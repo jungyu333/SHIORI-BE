@@ -10,9 +10,9 @@ class DiaryMeta:
     user_id: int
     date: str
     title: str = ""
-    version: int = 1
     summary_status: SummaryStatus = SummaryStatus.pending
     is_archived: bool = False
+    version: Optional[int] = 1
     id: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -49,7 +49,7 @@ class DiaryMeta:
             user_id=self.user_id,
             date=self.date,
             title=self.title,
-            version=self.version,
+            version=self.version if self.version else 1,
             summary_status=self.summary_status,
             is_archived=self.is_archived,
         )

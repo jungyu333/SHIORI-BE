@@ -39,6 +39,7 @@ class DiaryService:
         self._emotion_pipeline = EmotionPipeline(model=EmotionModel())
         self._summarize_pipeline = SummarizePipeline()
 
+    @MongoTransactional()
     async def save_diary(
         self,
         *,
@@ -75,10 +76,7 @@ class DiaryService:
         DiaryMetaValidator.validate_title(title)
 
         diary_meta_vo = DiaryMetaVO(
-            user_id=user_id,
-            date=date,
-            title=title,
-            version=version,
+            user_id=user_id, date=date, title=title, version=version
         )
 
         diary_meta_id = await self._diary_meta_repo.save_diary_meta(
@@ -90,14 +88,13 @@ class DiaryService:
 
         return diary_meta_id
 
-    @MongoTransactional()
     async def upsert_diary(
         self,
         *,
         user_id: int,
         date: str,
-        version: int,
         content: ProseMirror,
+        version: Optional[int],
         title: Optional[str] = "",
     ) -> tuple[str | None, bool | None]:
 
