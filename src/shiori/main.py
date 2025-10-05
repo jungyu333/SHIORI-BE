@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import sys
 
@@ -23,19 +24,30 @@ from app.core.config import get_settings
     is_flag=True,
     default=False,
 )
-def main(env: str, debug: bool) -> None:
+@click.option(
+    "--workers",
+    type=int,
+    default=None,
+    help="Number of worker processes. Defaults to CPU count in prod.",
+)
+def main(env: str, debug: bool, workers: int | None) -> None:
 
     os.environ["ENV"] = env
     os.environ["DEBUG"] = str(debug)
 
     settings = get_settings()
 
+    if env == "dev":
+        num_workers = 1
+    else:
+        num_workers = workers or multiprocessing.cpu_count()
+
     uvicorn.run(
         app="app.server:app",
         host=settings.APP_HOST,
         port=settings.APP_PORT,
-        reload=True if env == "dev" else False,
-        workers=1,
+        reload=(env == "dev"),
+        workers=num_workers,
     )
 
 
