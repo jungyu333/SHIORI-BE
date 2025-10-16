@@ -59,6 +59,22 @@ services:
     networks:
       - shiori-net
 
+  worker:
+    build:
+      context: ../..
+      dockerfile: ./docker/dev/Dockerfile.worker
+    container_name: shiori-celery-worker
+    restart: always
+    depends_on:
+      - redis
+      - mongodb
+      - mysql
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/2
+      - CELERY_BACKEND_URL=redis://redis:6379/3
+    networks:
+      - shiori-net
+
 
 volumes:
   mysql_data:

@@ -4,7 +4,6 @@ from pathlib import Path
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings
-
 from shiori.app.utils import get_root_path
 
 BASE_DIR = get_root_path(Path(__file__).resolve())
@@ -26,6 +25,8 @@ class BaseConfig(BaseSettings):
     MONGO_DB_URL: str
     MONGO_DB_NAME: str
     OPENAI_API_KEY: SecretStr
+    CELERY_BROKER_URL: str = "redis://localhost:6379/2"
+    CELERY_BACKEND_URL: str = "redis://localhost:6379/3"
 
     class Config:
         env_file = ENV_DIR / ".env.development"  # fallback
