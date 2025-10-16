@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir poetry
+
+ENV POETRY_VIRTUALENVS_CREATE=false \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src \
+    CELERY_BROKER_URL=redis://redis:6379/2 \
+    CELERY_BACKEND_URL=redis://redis:6379/3
+
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-root --only main
+COPY . .
+
+CMD ["celery", "-A", "shiori.app.celery.celery_app", "worker", "-Q", "summary-queue", "--loglevel=info"]
