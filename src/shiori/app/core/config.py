@@ -26,6 +26,8 @@ class BaseConfig(BaseSettings):
     MONGO_DB_URL: str
     MONGO_DB_NAME: str
     OPENAI_API_KEY: SecretStr
+    CELERY_BROKER_URL: str = "redis://redis:6379/2"
+    CELERY_BACKEND_URL: str = "redis://redis:6379/3"
 
     class Config:
         env_file = ENV_DIR / ".env.development"  # fallback
