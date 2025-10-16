@@ -10,8 +10,10 @@ celery_app = Celery(
 )
 
 celery_app.conf.task_routes = {
-    "worker.tasks.summary_task": {"queue": "summary-queue"},
+    "summary_task": {"queue": "summary-queue"},
 }
+
+celery_app.autodiscover_tasks(packages=["shiori.app.celery.tasks"])
 
 celery_app.conf.update(
     task_track_started=True,
