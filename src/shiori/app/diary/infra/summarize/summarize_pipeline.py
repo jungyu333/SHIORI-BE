@@ -2,9 +2,7 @@ from typing import Any
 
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-
 from shiori.app.core import get_settings
-from shiori.app.diary.domain.entity import DiaryVO
 from shiori.app.diary.domain.schema import EmotionResult
 
 settings = get_settings()
@@ -39,16 +37,20 @@ class SummarizePipeline:
             input_variables=["week_diaries"],
         )
 
-    def _preprocess(self, *, diaries: list[DiaryVO], emotions: list[EmotionResult]):
+    def _preprocess(
+        self,
+        *,
+        week_contents: list[list[str]],
+        emotions: list[EmotionResult],
+        dates: list[str],
+    ):
         week_data = list()
 
-        for diary, emo in zip(diaries, emotions):
-            text: str = " ".join(
-                block.content for block in diary.diary_blocks if block.content
-            )
+        for day_texts, emo, date in zip(week_contents, emotions, dates):
+            text: str = " ".join(day_texts)
             week_data.append(
                 {
-                    "date": diary.date,
+                    "date": date,
                     "text": text,
                     "emotion": emo.predicted,
                     "emotion_probs": emo.probabilities,
@@ -77,10 +79,17 @@ class SummarizePipeline:
 
         return "\n\n".join(formatted)
 
-    async def run(self, diaries: list[DiaryVO], emotions: list[EmotionResult]) -> str:
+    async def run(
+        self,
+        week_contents: list[list[str]],
+        emotions: list[EmotionResult],
+        dates: list[str],
+    ) -> str:
 
         chain = self._prompt | self._llm
-        week_data = self._preprocess(diaries=diaries, emotions=emotions)
+        week_data = self._preprocess(
+            week_contents=week_contents, emotions=emotions, dates=dates
+        )
         week_diaries_str = self._format_for_prompt(week_data)
 
         result = await chain.ainvoke({"week_diaries": week_diaries_str})
