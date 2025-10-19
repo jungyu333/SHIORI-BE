@@ -30,7 +30,7 @@ def summary_task(self, payload: dict):
             )
         )
         response = requests.post(
-            "http://host.docker.internal:8080/internal/summarize/result",
+            "http://host.docker.internal:8080/api/internal/summarize/result",
             json={
                 "user_id": user_id,
                 "start": start,
