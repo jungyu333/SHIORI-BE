@@ -233,9 +233,6 @@ class DiaryService:
     async def summarize_diary(
         self,
         *,
-        user_id: int,
-        start: str,
-        end: str,
         week_inputs: list[list[str]],
         diary_meta_ids: list[str],
         dates: list[str],
@@ -247,15 +244,6 @@ class DiaryService:
             reflection = await self._summarize_pipeline.run(
                 week_contents=week_inputs, emotions=emotion_results, dates=dates
             )
-            # await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
-
-            # await self.upsert_reflection(
-            #     user_id=user_id, reflection=reflection, start=start, end=end
-            # )
-
-            # await self.update_summary_status(
-            #     diary_meta_id=diary_meta_ids, status=SummaryStatus.completed
-            # )
 
             return reflection, emotion_results
 
@@ -266,6 +254,30 @@ class DiaryService:
                 status=SummaryStatus.failed,
             )
             raise SummarizeFailed
+
+    @Transactional()
+    async def upsert_summary_result(
+        self,
+        *,
+        user_id: int,
+        reflection: str,
+        start: str,
+        end: str,
+        diary_meta_ids: list[str],
+        emotion_results: list[dict],
+    ) -> None:
+
+        emotion_props = [
+            EmotionResult(**emotion_result) for emotion_result in emotion_results
+        ]
+
+        await self.upsert_diary_tag(
+            diary_meta_ids=diary_meta_ids, emotion_probs=emotion_props
+        )
+
+        await self.upsert_reflection(
+            user_id=user_id, reflection=reflection, start=start, end=end
+        )
 
     async def get_reflection(
         self, *, user_id: int, start: str, end: str
