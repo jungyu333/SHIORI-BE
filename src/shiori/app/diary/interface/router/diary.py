@@ -2,7 +2,6 @@ from typing import Annotated
 
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends, Path, Request, Query
-
 from shiori.app.container import Container
 from shiori.app.core.dependencies import IsAuthenticated, PermissionDependency
 from shiori.app.core.response import StandardResponse
@@ -78,7 +77,7 @@ async def summarize_diary(
     return {
         "code": 200 if is_success else 204,
         "message": (
-            "요약이 완료되었어요! 잠시 후 확인해보세요."
+            "요약이 시작되었어요! 잠시 후 확인해보세요."
             if is_success
             else "요약할 일지가 없어요! 일지를 작성해주세요!"
         ),
