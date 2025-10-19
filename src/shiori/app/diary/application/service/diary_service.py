@@ -202,6 +202,19 @@ class DiaryService:
 
         await self._reflection_repo.upsert(reflection=reflection_vo)
 
+    async def can_summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
+
+        week_diary = await self.get_week_diary(
+            user_id=user_id,
+            start=start,
+            end=end,
+        )
+
+        if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
+            return False
+
+        return True
+
     async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
 
         ## 7일치 diary get
