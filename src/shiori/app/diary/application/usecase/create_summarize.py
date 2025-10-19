@@ -17,6 +17,10 @@ class CreateSummarize:
         if not week_diary:
             return False
 
+        week_inputs, diary_meta_ids = await self._diary_service.prepare_summarize_diary(
+            week_diary=week_diary,
+        )
+
         celery_app.send_task(
             "summary_task",
             args=[
@@ -24,6 +28,8 @@ class CreateSummarize:
                     "user_id": user_id,
                     "start": start_date,
                     "end": end_date,
+                    "week_inputs": week_inputs,
+                    "diary_meta_ids": diary_meta_ids,
                 }
             ],
             queue="summary-queue",

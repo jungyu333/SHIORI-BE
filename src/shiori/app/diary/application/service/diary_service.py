@@ -217,6 +217,19 @@ class DiaryService:
 
         return week_diary
 
+    async def prepare_summarize_diary(
+        self, *, week_diary: list[DiaryVO]
+    ) -> tuple[list[list[str]], list[str]]:
+        diary_meta_ids = [diary.diary_meta_id for diary in week_diary]
+
+        week_inputs = self._adaptor.convert_week(diaries=week_diary)
+
+        await self.update_summary_status(
+            diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
+        )
+
+        return week_inputs, diary_meta_ids
+
     async def summarize_diary(
         self,
         *,
