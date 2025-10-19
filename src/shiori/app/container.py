@@ -29,7 +29,12 @@ from shiori.app.user.infra.repository.user import UserRepositoryImpl
 
 class Container(DeclarativeContainer):
     wiring_config = WiringConfiguration(
-        packages=["shiori.app.user", "shiori.app.auth", "shiori.app.diary"]
+        packages=[
+            "shiori.app.user",
+            "shiori.app.auth",
+            "shiori.app.diary",
+            "shiori.app.internal",
+        ],
     )
 
     """ Repository """
