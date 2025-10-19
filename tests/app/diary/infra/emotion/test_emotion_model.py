@@ -10,7 +10,6 @@ def emotion_model() -> EmotionModel:
     return EmotionModel(model_name=MODEL_NAME, device="cpu")
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "text",
     [
@@ -19,14 +18,14 @@ def emotion_model() -> EmotionModel:
         "꿈에서 처녀귀신이 칼 들고 쫓아와서 너무 무서웠어",
     ],
 )
-async def test_predict(emotion_model: EmotionModel, text):
+def test_predict(emotion_model: EmotionModel, text):
     # Given
 
     model = emotion_model
 
     # When
 
-    result = await model.predict(text=text)
+    result = model.predict(text=text)
 
     # Then
 

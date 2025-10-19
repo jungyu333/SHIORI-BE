@@ -1,9 +1,8 @@
 from datetime import timedelta, datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from pymongo.errors import PyMongoError
-
 from shiori.app.diary.application.service import DiaryService
 from shiori.app.diary.domain.entity import (
     DiaryVO,
@@ -704,7 +703,7 @@ async def test_summarize_diary(
 
     tag_repository_mock.upsert.return_value = None
 
-    diary_service._emotion_pipeline.analyze = AsyncMock()
+    diary_service._emotion_pipeline.analyze = MagicMock()
     diary_service._emotion_pipeline.analyze.return_value = [
         EmotionResult(predicted="행복", probabilities={"행복": 0.9, "슬픔": 0.1})
     ] * 7
@@ -732,6 +731,9 @@ async def test_summarize_diary_llm_failure(
     reflection_repository_mock,
     diary_service,
 ):
+    import warnings
+
+    warnings.simplefilter("error", RuntimeWarning)
     # Given
     user_id = 1
     start_date = "20250810"
@@ -752,8 +754,8 @@ async def test_summarize_diary_llm_failure(
     diary_repository_mock.get_diary_by_date_range.return_value = [diary_vo_mock] * 7
     tag_repository_mock.upsert.return_value = None
 
-    diary_service._adaptor.convert_week = AsyncMock(return_value=["dummy"] * 7)
-    diary_service._emotion_pipeline.analyze = AsyncMock(
+    diary_service._adaptor.convert_week = MagicMock(return_value=["dummy"] * 7)
+    diary_service._emotion_pipeline.analyze = MagicMock(
         return_value=[
             EmotionResult(predicted="행복", probabilities={"행복": 0.9, "슬픔": 0.1})
         ]

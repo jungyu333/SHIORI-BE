@@ -1,4 +1,3 @@
-from asyncio import gather
 from collections import Counter
 
 from shiori.app.diary.domain.constants import EMOTION_LABELS
@@ -10,11 +9,11 @@ class EmotionPipeline:
     def __init__(self, model: EmotionModel):
         self._model = model
 
-    async def analyze_day(self, daily_texts: list[str]) -> EmotionResult:
+    def analyze_day(self, daily_texts: list[str]) -> EmotionResult:
 
-        results: list[EmotionResult] = await gather(
-            *[self._model.predict(text=t) for t in daily_texts]
-        )
+        results: list[EmotionResult] = [
+            self._model.predict(text=t) for t in daily_texts
+        ]
 
         predicted_labels = [result.predicted for result in results]
         most_common = Counter(predicted_labels).most_common(1)[0][0]
@@ -32,7 +31,7 @@ class EmotionPipeline:
             probabilities=averaged,
         )
 
-    async def analyze(self, week_diary_texts: list[list[str]]) -> list[EmotionResult]:
-        tasks = [self.analyze_day(daily_texts) for daily_texts in week_diary_texts]
-        results = await gather(*tasks)
+    def analyze(self, week_diary_texts: list[list[str]]) -> list[EmotionResult]:
+        results = [self.analyze_day(daily_texts) for daily_texts in week_diary_texts]
+
         return results

@@ -225,7 +225,7 @@ class DiaryService:
 
             week_inputs = self._adaptor.convert_week(diaries=week_diary)
 
-            emotion_results = await self._emotion_pipeline.analyze(week_inputs)
+            emotion_results = self._emotion_pipeline.analyze(week_inputs)
 
             await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
 

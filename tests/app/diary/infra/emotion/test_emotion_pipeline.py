@@ -1,7 +1,6 @@
 import time
 
 import pytest
-
 from shiori.app.diary.domain.constants import MODEL_NAME, EMOTION_LABELS
 from shiori.app.diary.domain.schema import EmotionResult
 from shiori.app.diary.infra.emotion import EmotionModel, EmotionPipeline
@@ -17,10 +16,7 @@ def emotion_pipeline(emotion_model: EmotionModel) -> EmotionPipeline:
     return EmotionPipeline(model=emotion_model)
 
 
-@pytest.mark.asyncio
-async def test_analyze_day(
-    emotion_model: EmotionModel, emotion_pipeline: EmotionPipeline
-):
+def test_analyze_day(emotion_model: EmotionModel, emotion_pipeline: EmotionPipeline):
     # Given
     daily_texts = [
         "오늘 하루는 정말 즐거웠고, 기분이 좋았어.",
@@ -32,7 +28,7 @@ async def test_analyze_day(
 
     # When
     start = time.perf_counter()
-    result = await pipeline.analyze_day(daily_texts)
+    result = pipeline.analyze_day(daily_texts)
     elapsed = time.perf_counter() - start
 
     print(f"\n[analyze_day duration] {elapsed:.4f} seconds")
@@ -52,8 +48,7 @@ async def test_analyze_day(
         assert 0.0 <= prob <= 1.0
 
 
-@pytest.mark.asyncio
-async def test_analyze(
+def test_analyze(
     emotion_model: EmotionModel, emotion_pipeline: EmotionPipeline
 ) -> None:
     # Given
@@ -99,7 +94,7 @@ async def test_analyze(
 
     # When
     start = time.perf_counter()
-    results = await pipeline.analyze(week_diary_texts)
+    results = pipeline.analyze(week_diary_texts)
     elapsed = time.perf_counter() - start
 
     print(f"\n[analyze (weekly) duration] {elapsed:.4f} seconds")

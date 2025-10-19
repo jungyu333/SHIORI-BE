@@ -1,9 +1,8 @@
 import torch
-from torch import nn
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
 from shiori.app.diary.domain.constants import MODEL_NAME, EMOTION_LABELS
 from shiori.app.diary.domain.schema import EmotionResult
+from torch import nn
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 
 class EmotionModel:
@@ -21,7 +20,7 @@ class EmotionModel:
         self.softmax = nn.Softmax(dim=1)
         self.id2label = EMOTION_LABELS
 
-    async def predict(self, *, text: str) -> EmotionResult:
+    def predict(self, *, text: str) -> EmotionResult:
 
         encoded = self.tokenizer(
             text, return_tensors="pt", truncation=True, padding=True
