@@ -202,7 +202,9 @@ class DiaryService:
 
         await self._reflection_repo.upsert(reflection=reflection_vo)
 
-    async def can_summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
+    async def can_summarize_diary(
+        self, *, user_id: int, start: str, end: str
+    ) -> tuple[None, None] | tuple[list[DiaryVO], list[str]]:
 
         week_diary = await self.get_week_diary(
             user_id=user_id,
@@ -211,26 +213,22 @@ class DiaryService:
         )
 
         if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
-            return False
+            return None, None
 
-        return True
+        diary_meta_ids = [d.diary_meta_id for d in week_diary]
+        return week_diary, diary_meta_ids
 
-    async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
-
-        ## 7일치 diary get
-        week_diary = await self.get_week_diary(
-            user_id=user_id,
-            start=start,
-            end=end,
-        )
-
-        if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
-            return False
-
-        diary_meta_ids = [diary.diary_meta_id for diary in week_diary]
+    async def summarize_diary(
+        self,
+        *,
+        user_id: int,
+        start: str,
+        end: str,
+        week_diary: list[DiaryVO],
+        diary_meta_ids: list[str],
+    ) -> bool:
 
         try:
-            ## tag inference
 
             await self.update_summary_status(
                 diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
@@ -257,10 +255,6 @@ class DiaryService:
             return True
 
         except Exception as e:
-
-            await self.update_summary_status(
-                diary_meta_id=diary_meta_ids, status=SummaryStatus.failed
-            )
 
             raise SummarizeFailed
 

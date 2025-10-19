@@ -8,18 +8,26 @@ class CreateSummarize:
 
     async def execute(self, *, user_id: int, start_date: str, end_date: str) -> bool:
 
-        can_summarize = await self._diary_service.can_summarize_diary(
+        week_diary, diary_meta_ids = await self._diary_service.can_summarize_diary(
             user_id=user_id,
             start=start_date,
             end=end_date,
         )
 
-        if not can_summarize:
+        if not week_diary:
             return False
 
         celery_app.send_task(
             "summary_task",
-            args=[{"user_id": user_id, "start": start_date, "end": end_date}],
+            args=[
+                {
+                    "user_id": user_id,
+                    "start": start_date,
+                    "end": end_date,
+                    "week_diary": week_diary,
+                    "diary_meta_ids": diary_meta_ids,
+                }
+            ],
             queue="summary-queue",
         )
 
