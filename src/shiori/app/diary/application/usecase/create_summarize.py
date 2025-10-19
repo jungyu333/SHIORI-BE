@@ -8,7 +8,7 @@ class CreateSummarize:
 
     async def execute(self, *, user_id: int, start_date: str, end_date: str) -> bool:
 
-        week_diary, diary_meta_ids = await self._diary_service.can_summarize_diary(
+        week_diary = await self._diary_service.can_summarize_diary(
             user_id=user_id,
             start=start_date,
             end=end_date,
@@ -24,8 +24,6 @@ class CreateSummarize:
                     "user_id": user_id,
                     "start": start_date,
                     "end": end_date,
-                    "week_diary": week_diary,
-                    "diary_meta_ids": diary_meta_ids,
                 }
             ],
             queue="summary-queue",

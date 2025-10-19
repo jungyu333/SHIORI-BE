@@ -204,7 +204,7 @@ class DiaryService:
 
     async def can_summarize_diary(
         self, *, user_id: int, start: str, end: str
-    ) -> tuple[None, None] | tuple[list[DiaryVO], list[str]]:
+    ) -> list[DiaryVO] | None:
 
         week_diary = await self.get_week_diary(
             user_id=user_id,
@@ -213,10 +213,9 @@ class DiaryService:
         )
 
         if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
-            return None, None
+            return None
 
-        diary_meta_ids = [d.diary_meta_id for d in week_diary]
-        return week_diary, diary_meta_ids
+        return week_diary
 
     async def summarize_diary(
         self,
@@ -224,9 +223,14 @@ class DiaryService:
         user_id: int,
         start: str,
         end: str,
-        week_diary: list[DiaryVO],
-        diary_meta_ids: list[str],
     ) -> bool:
+
+        week_diary = await self.get_week_diary(
+            user_id=user_id,
+            start=start,
+            end=end,
+        )
+        diary_meta_ids = [d.diary_meta_id for d in week_diary]
 
         try:
 
@@ -256,6 +260,10 @@ class DiaryService:
 
         except Exception as e:
 
+            await self.update_summary_status(
+                diary_meta_id=diary_meta_ids,
+                status=SummaryStatus.failed,
+            )
             raise SummarizeFailed
 
     async def get_reflection(

@@ -1,2 +1,3 @@
 from .celery_app import *
-from .tasks import *
+
+# from .tasks import *
