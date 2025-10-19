@@ -17,6 +17,7 @@ from shiori.app.diary.infra.repository import (
     TagRepositoryImpl,
     ReflectionRepositoryImpl,
 )
+from shiori.app.internal.application.usecase import SummarizeResult
 from shiori.app.user.application.service import UserService
 from shiori.app.user.application.usecase import (
     CreateUserUseCase,
@@ -74,3 +75,6 @@ class Container(DeclarativeContainer):
     get_week_diary_meta = Factory(GetWeekDiaryMeta, diary_service=diary_service)
     create_summarize = Factory(CreateSummarize, diary_service=diary_service)
     get_reflection = Factory(GetReflection, diary_service=diary_service)
+
+    """ Internal """
+    summarize_result = Factory(SummarizeResult, diary_service=diary_service)
