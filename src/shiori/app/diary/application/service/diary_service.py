@@ -219,16 +219,16 @@ class DiaryService:
 
     async def prepare_summarize_diary(
         self, *, week_diary: list[DiaryVO]
-    ) -> tuple[list[list[str]], list[str]]:
+    ) -> tuple[list[list[str]], list[str], list[str]]:
         diary_meta_ids = [diary.diary_meta_id for diary in week_diary]
 
-        week_inputs = self._adaptor.convert_week(diaries=week_diary)
+        week_inputs, dates = self._adaptor.convert_week(diaries=week_diary)
 
         await self.update_summary_status(
             diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
         )
 
-        return week_inputs, diary_meta_ids
+        return week_inputs, diary_meta_ids, dates
 
     async def summarize_diary(
         self,
@@ -236,39 +236,28 @@ class DiaryService:
         user_id: int,
         start: str,
         end: str,
+        week_inputs: list[list[str]],
+        diary_meta_ids: list[str],
+        dates: list[str],
     ) -> bool:
-
-        week_diary = await self.get_week_diary(
-            user_id=user_id,
-            start=start,
-            end=end,
-        )
-        diary_meta_ids = [d.diary_meta_id for d in week_diary]
-
         try:
-
-            await self.update_summary_status(
-                diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
-            )
-
-            week_inputs = self._adaptor.convert_week(diaries=week_diary)
 
             emotion_results = self._emotion_pipeline.analyze(week_inputs)
 
-            await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
+            # await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
 
             reflection = await self._summarize_pipeline.run(
-                diaries=week_diary, emotions=emotion_results
+                week_contents=week_inputs, emotions=emotion_results, dates=dates
             )
 
-            await self.upsert_reflection(
-                user_id=user_id, reflection=reflection, start=start, end=end
-            )
+            # await self.upsert_reflection(
+            #     user_id=user_id, reflection=reflection, start=start, end=end
+            # )
 
-            await self.update_summary_status(
-                diary_meta_id=diary_meta_ids, status=SummaryStatus.completed
-            )
-
+            # await self.update_summary_status(
+            #     diary_meta_id=diary_meta_ids, status=SummaryStatus.completed
+            # )
+            print(reflection)
             return True
 
         except Exception as e:
