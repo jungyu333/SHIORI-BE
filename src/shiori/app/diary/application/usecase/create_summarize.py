@@ -1,3 +1,4 @@
+from shiori.app.celery.celery_app import celery_app
 from shiori.app.diary.application.service import DiaryService
 
 
@@ -7,10 +8,19 @@ class CreateSummarize:
 
     async def execute(self, *, user_id: int, start_date: str, end_date: str) -> bool:
 
-        result = await self._diary_service.summarize_diary(
+        can_summarize = await self._diary_service.can_summarize_diary(
             user_id=user_id,
             start=start_date,
             end=end_date,
         )
 
-        return result
+        if not can_summarize:
+            return False
+
+        celery_app.send_task(
+            "summary_task",
+            args=[{"user_id": user_id, "start": start_date, "end": end_date}],
+            queue="summary-queue",
+        )
+
+        return True
