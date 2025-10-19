@@ -164,15 +164,15 @@ class DiaryService:
 
     @Transactional()
     async def upsert_diary_tag(
-        self, *, diary: list[DiaryVO], emotion_probs: list[EmotionResult]
+        self, *, diary_meta_ids: list[str], emotion_probs: list[EmotionResult]
     ) -> None:
 
-        for diary_vo, result in zip(diary, emotion_probs):
+        for diary_meta_id, result in zip(diary_meta_ids, emotion_probs):
             predicted_label = result.predicted
             confidence = result.probabilities[predicted_label]
 
             tag_vo = TagVO(
-                diary_meta_id=diary_vo.diary_meta_id,
+                diary_meta_id=diary_meta_id,
                 label=predicted_label,
                 confidence=confidence,
             )
@@ -239,16 +239,15 @@ class DiaryService:
         week_inputs: list[list[str]],
         diary_meta_ids: list[str],
         dates: list[str],
-    ) -> bool:
+    ) -> tuple[str, list[EmotionResult]]:
         try:
 
             emotion_results = self._emotion_pipeline.analyze(week_inputs)
 
-            # await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
-
             reflection = await self._summarize_pipeline.run(
                 week_contents=week_inputs, emotions=emotion_results, dates=dates
             )
+            # await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
 
             # await self.upsert_reflection(
             #     user_id=user_id, reflection=reflection, start=start, end=end
@@ -257,8 +256,8 @@ class DiaryService:
             # await self.update_summary_status(
             #     diary_meta_id=diary_meta_ids, status=SummaryStatus.completed
             # )
-            print(reflection)
-            return True
+
+            return reflection, emotion_results
 
         except Exception as e:
 
