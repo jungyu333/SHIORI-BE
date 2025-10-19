@@ -24,16 +24,13 @@ def summary_task(self, payload: dict):
     try:
         reflection, emotion_results = asyncio.run(
             diary_service.summarize_diary(
-                user_id=user_id,
-                start=start,
-                end=end,
                 week_inputs=week_inputs,
                 diary_meta_ids=diary_meta_ids,
                 dates=dates,
             )
         )
         response = requests.post(
-            "http://host.docker.internal:8000/internal/summarize/result",
+            "http://host.docker.internal:8080/internal/summarize/result",
             json={
                 "user_id": user_id,
                 "start": start,
