@@ -72,6 +72,8 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/2
       - CELERY_BACKEND_URL=redis://redis:6379/3
+    volumes:
+      - ../..:/app
     networks:
       - shiori-net
 

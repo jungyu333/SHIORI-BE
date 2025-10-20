@@ -164,15 +164,15 @@ class DiaryService:
 
     @Transactional()
     async def upsert_diary_tag(
-        self, *, diary: list[DiaryVO], emotion_probs: list[EmotionResult]
+        self, *, diary_meta_ids: list[str], emotion_probs: list[EmotionResult]
     ) -> None:
 
-        for diary_vo, result in zip(diary, emotion_probs):
+        for diary_meta_id, result in zip(diary_meta_ids, emotion_probs):
             predicted_label = result.predicted
             confidence = result.probabilities[predicted_label]
 
             tag_vo = TagVO(
-                diary_meta_id=diary_vo.diary_meta_id,
+                diary_meta_id=diary_meta_id,
                 label=predicted_label,
                 confidence=confidence,
             )
@@ -202,9 +202,10 @@ class DiaryService:
 
         await self._reflection_repo.upsert(reflection=reflection_vo)
 
-    async def summarize_diary(self, *, user_id: int, start: str, end: str) -> bool:
+    async def can_summarize_diary(
+        self, *, user_id: int, start: str, end: str
+    ) -> list[DiaryVO] | None:
 
-        ## 7일치 diary get
         week_diary = await self.get_week_diary(
             user_id=user_id,
             start=start,
@@ -212,44 +213,71 @@ class DiaryService:
         )
 
         if len(week_diary) != REQUIRED_DAYS_FOR_SUMMARY:
-            return False
+            return None
 
+        return week_diary
+
+    async def prepare_summarize_diary(
+        self, *, week_diary: list[DiaryVO]
+    ) -> tuple[list[list[str]], list[str], list[str]]:
         diary_meta_ids = [diary.diary_meta_id for diary in week_diary]
 
+        week_inputs, dates = self._adaptor.convert_week(diaries=week_diary)
+
+        await self.update_summary_status(
+            diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
+        )
+
+        return week_inputs, diary_meta_ids, dates
+
+    async def summarize_diary(
+        self,
+        *,
+        week_inputs: list[list[str]],
+        diary_meta_ids: list[str],
+        dates: list[str],
+    ) -> tuple[str, list[EmotionResult]]:
         try:
-            ## tag inference
-
-            await self.update_summary_status(
-                diary_meta_id=diary_meta_ids, status=SummaryStatus.pending
-            )
-
-            week_inputs = self._adaptor.convert_week(diaries=week_diary)
 
             emotion_results = self._emotion_pipeline.analyze(week_inputs)
 
-            await self.upsert_diary_tag(diary=week_diary, emotion_probs=emotion_results)
-
             reflection = await self._summarize_pipeline.run(
-                diaries=week_diary, emotions=emotion_results
+                week_contents=week_inputs, emotions=emotion_results, dates=dates
             )
 
-            await self.upsert_reflection(
-                user_id=user_id, reflection=reflection, start=start, end=end
-            )
-
-            await self.update_summary_status(
-                diary_meta_id=diary_meta_ids, status=SummaryStatus.completed
-            )
-
-            return True
+            return reflection, emotion_results
 
         except Exception as e:
 
             await self.update_summary_status(
-                diary_meta_id=diary_meta_ids, status=SummaryStatus.failed
+                diary_meta_id=diary_meta_ids,
+                status=SummaryStatus.failed,
             )
-
             raise SummarizeFailed
+
+    @Transactional()
+    async def upsert_summary_result(
+        self,
+        *,
+        user_id: int,
+        reflection: str,
+        start: str,
+        end: str,
+        diary_meta_ids: list[str],
+        emotion_results: list[dict],
+    ) -> None:
+
+        emotion_props = [
+            EmotionResult(**emotion_result) for emotion_result in emotion_results
+        ]
+
+        await self.upsert_diary_tag(
+            diary_meta_ids=diary_meta_ids, emotion_probs=emotion_props
+        )
+
+        await self.upsert_reflection(
+            user_id=user_id, reflection=reflection, start=start, end=end
+        )
 
     async def get_reflection(
         self, *, user_id: int, start: str, end: str

@@ -4,7 +4,6 @@ from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
-
 from shiori.app.auth.interface.router import auth_router
 from shiori.app.container import Container
 from shiori.app.core.database import lifespan_context
@@ -22,6 +21,7 @@ from shiori.app.core.middleware import (
     SQLAlchemyMiddleware,
 )
 from shiori.app.diary.interface.router import diary_router
+from shiori.app.internal.interface.router import internal_router
 from shiori.app.user.interface.router import user_router
 
 
@@ -29,6 +29,7 @@ def init_router(app_: FastAPI) -> None:
     app_.include_router(user_router, prefix="/api/user", tags=["User"])
     app_.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
     app_.include_router(diary_router, prefix="/api/diary", tags=["Diary"])
+    app_.include_router(internal_router, prefix="/api/internal", tags=["Internal"])
 
 
 def init_listener(app_: FastAPI) -> None:
