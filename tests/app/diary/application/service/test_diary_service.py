@@ -4,12 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from pymongo.errors import PyMongoError
 from shiori.app.diary.application.service import DiaryService
-from shiori.app.diary.domain.entity import (
-    DiaryVO,
-    DiaryBlockVO,
-    DiaryMetaVO,
-    ReflectionVO,
-)
+from shiori.app.diary.domain.entity import DiaryVO, DiaryMetaVO, ReflectionVO, TagVO
 from shiori.app.diary.domain.exception import (
     NotValidDateFormat,
     NotValidTitle,
@@ -23,7 +18,7 @@ from shiori.app.diary.domain.repository import (
     ReflectionRepository,
 )
 from shiori.app.diary.domain.schema import EmotionResult
-from shiori.app.diary.infra.model import ProseMirror
+from shiori.app.diary.infra.model import ProseMirror, SummaryStatus
 
 
 @pytest.fixture
@@ -663,65 +658,53 @@ async def test_summarize_diary(
     diary_repository_mock, tag_repository_mock, diary_service
 ):
     # Given
-
-    user_id = 1
-    start_date = "20250810"
-    end_date = "20250816"
-
-    diary_content_dict = {
-        "type": "doc",
-        "content": [
-            {
-                "type": "paragraph",
-                "attrs": {"textAlign": "left"},
-                "content": [
-                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
-                ],
-            }
-        ],
-    }
-
-    content = ProseMirror(**diary_content_dict)
-
-    diary_vo_mock = AsyncMock(spec=DiaryVO)
-    diary_vo_mock.diary_content = content
-    diary_vo_mock.diary_meta_id = "dummy_diary_meta_id"
-
-    diary_vo_mock.diary_blocks = [
-        DiaryBlockVO(
-            order=0,
-            type="paragraph",
-            content="hello",
-            textAlign="left",
-            marks=["bold"],
-        )
+    week_inputs = [["오늘은 행복한 하루였다."] * 7]
+    diary_meta_ids = [
+        "meta_1",
+        "meta_2",
+        "meta_3",
+        "meta_4",
+        "meta_5",
+        "meta_6",
+        "meta_7",
+    ]
+    dates = [
+        "20250810",
+        "20250811",
+        "20250812",
+        "20250813",
+        "20250814",
+        "20250815",
+        "20250816",
     ]
 
-    expected = [diary_vo_mock] * 7
-
-    diary_repository_mock.get_diary_by_date_range.return_value = expected
-
-    tag_repository_mock.upsert.return_value = None
-
-    diary_service._emotion_pipeline.analyze = MagicMock()
-    diary_service._emotion_pipeline.analyze.return_value = [
+    dummy_emotion_results = [
         EmotionResult(predicted="행복", probabilities={"행복": 0.9, "슬픔": 0.1})
     ] * 7
 
-    diary_service._adaptor.convert_week = AsyncMock(return_value=["dummy"] * 7)
-    diary_service._summarize_pipeline.run = AsyncMock()
-    diary_service._summarize_pipeline.return_value = "dummy_value"
+    diary_service._emotion_pipeline.analyze = MagicMock(
+        return_value=dummy_emotion_results
+    )
+
+    diary_service._summarize_pipeline.run = AsyncMock(
+        return_value="이번 주는 행복한 한 주였습니다."
+    )
 
     # When
 
-    result = await diary_service.summarize_diary(
-        user_id=user_id,
-        start=start_date,
-        end=end_date,
+    reflection, emotion_results = await diary_service.summarize_diary(
+        week_inputs=week_inputs,
+        diary_meta_ids=diary_meta_ids,
+        dates=dates,
     )
 
     # Then
-    assert result == True
+    assert reflection == "이번 주는 행복한 한 주였습니다."
+    assert emotion_results == dummy_emotion_results
+    diary_service._emotion_pipeline.analyze.assert_called_once_with(week_inputs)
+    diary_service._summarize_pipeline.run.assert_awaited_once_with(
+        week_contents=week_inputs, emotions=dummy_emotion_results, dates=dates
+    )
 
 
 @pytest.mark.asyncio
@@ -731,30 +714,27 @@ async def test_summarize_diary_llm_failure(
     reflection_repository_mock,
     diary_service,
 ):
-    import warnings
-
-    warnings.simplefilter("error", RuntimeWarning)
     # Given
-    user_id = 1
-    start_date = "20250810"
-    end_date = "20250816"
-
-    diary_vo_mock = AsyncMock(spec=DiaryVO)
-    diary_vo_mock.diary_meta_id = "dummy_diary_meta_id"
-    diary_vo_mock.diary_blocks = [
-        DiaryBlockVO(
-            order=0,
-            type="paragraph",
-            content="hello",
-            textAlign="left",
-            marks=["bold"],
-        )
+    week_inputs = [["오늘은 행복한 하루였다."] * 7]
+    diary_meta_ids = [
+        "meta_1",
+        "meta_2",
+        "meta_3",
+        "meta_4",
+        "meta_5",
+        "meta_6",
+        "meta_7",
+    ]
+    dates = [
+        "20250810",
+        "20250811",
+        "20250812",
+        "20250813",
+        "20250814",
+        "20250815",
+        "20250816",
     ]
 
-    diary_repository_mock.get_diary_by_date_range.return_value = [diary_vo_mock] * 7
-    tag_repository_mock.upsert.return_value = None
-
-    diary_service._adaptor.convert_week = MagicMock(return_value=["dummy"] * 7)
     diary_service._emotion_pipeline.analyze = MagicMock(
         return_value=[
             EmotionResult(predicted="행복", probabilities={"행복": 0.9, "슬픔": 0.1})
@@ -766,79 +746,38 @@ async def test_summarize_diary_llm_failure(
         side_effect=Exception("LLM error")
     )
 
+    diary_service.update_summary_status = AsyncMock()
+
     # When, Then
     with pytest.raises(SummarizeFailed) as e:
         await diary_service.summarize_diary(
-            user_id=user_id,
-            start=start_date,
-            end=end_date,
+            week_inputs=week_inputs,
+            diary_meta_ids=diary_meta_ids,
+            dates=dates,
         )
 
     assert e.value.code == 503
     assert e.value.message == "요약 처리에 실패했습니다. 잠시 후 다시 시도해주세요."
 
-
-async def test_summarize_diary_return_none_diary(diary_repository_mock, diary_service):
-
-    # Given
-
-    user_id = 1
-    start_date = "20250810"
-    end_date = "20250816"
-
-    diary_repository_mock.get_diary_by_date_range.return_value = []
-
-    # When
-
-    result = await diary_service.summarize_diary(
-        user_id=user_id,
-        start=start_date,
-        end=end_date,
+    diary_service.update_summary_status.assert_awaited_once_with(
+        diary_meta_id=diary_meta_ids,
+        status=SummaryStatus.failed,
     )
 
-    # Then
-
-    assert result == False
+    diary_service._summarize_pipeline.run.assert_awaited_once_with(
+        week_contents=week_inputs,
+        emotions=diary_service._emotion_pipeline.analyze.return_value,
+        dates=dates,
+    )
 
 
 @pytest.mark.asyncio
 async def test_upsert_diary_tag(tag_repository_mock, diary_service):
     # Given
 
-    diary_content_dict = {
-        "type": "doc",
-        "content": [
-            {
-                "type": "paragraph",
-                "attrs": {"textAlign": "left"},
-                "content": [
-                    {"type": "text", "text": "hello", "marks": [{"type": "bold"}]}
-                ],
-            }
-        ],
-    }
+    diary_meta_ids = [f"meta_{i}" for i in range(7)]
 
-    content = ProseMirror(**diary_content_dict)
-
-    diary_vo_mock = AsyncMock(spec=DiaryVO)
-    diary_vo_mock.diary_content = content
-    diary_vo_mock.diary_meta_id = "dummy_diary_meta_id"
-
-    diary_vo_mock.diary_blocks = [
-        DiaryBlockVO(
-            order=0,
-            type="paragraph",
-            content="hello",
-            textAlign="left",
-            marks=["bold"],
-        )
-    ]
-
-    diary_vo_list = [diary_vo_mock] * 7
-
-    tag_repository_mock.upsert.return_value = None
-
-    emotion_props = [
+    emotion_probs = [
         EmotionResult(
             predicted="행복",
             probabilities={
@@ -851,18 +790,30 @@ async def test_upsert_diary_tag(tag_repository_mock, diary_service):
                 "혐오": 0.0,
             },
         )
-    ] * 7
+        for _ in range(7)
+    ]
+
+    tag_repository_mock.upsert = AsyncMock(return_value=None)
 
     # When
 
     result = await diary_service.upsert_diary_tag(
-        diary=diary_vo_list, emotion_probs=emotion_props
+        diary_meta_ids=diary_meta_ids,
+        emotion_probs=emotion_probs,
     )
 
     # Then
-
     assert result is None
-    assert tag_repository_mock.upsert.call_count == len(diary_vo_list)
+    assert tag_repository_mock.upsert.await_count == len(diary_meta_ids)
+
+    for call, meta_id, emotion in zip(
+        tag_repository_mock.upsert.await_args_list, diary_meta_ids, emotion_probs
+    ):
+        tag_vo_arg = call.kwargs["tag"]
+        assert isinstance(tag_vo_arg, TagVO)
+        assert tag_vo_arg.diary_meta_id == meta_id
+        assert tag_vo_arg.label == emotion.predicted
+        assert tag_vo_arg.confidence == emotion.probabilities[emotion.predicted]
 
 
 @pytest.mark.asyncio

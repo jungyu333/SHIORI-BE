@@ -393,7 +393,7 @@ async def test_summarize_diary(access_token_mock, test_dates):
     # Then
     assert response.json().get("code") == 200
     assert (
-        response.json().get("message") == "요약이 완료되었어요! 잠시 후 확인해보세요."
+        response.json().get("message") == "요약이 시작되었어요! 잠시 후 확인해보세요."
     )
     assert response.json().get("data") is None
 
