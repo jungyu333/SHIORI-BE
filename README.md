@@ -16,30 +16,68 @@
 
 ## 고민한 것들
 1. 요약 기능의 외부 LLM API 호출 지연으로 인해 사용자 경험이 저하되는 문제를 어떻게 해결할까?  
+
+
 2. 다중 로그인이 가능한 상황에서 동일 날짜 일지 저장 요청이 동시에 발생할 때 이를 어떻게 처리할까?
+
+
 3. 반복적인 일기 조회 요청에 대해 빠른 조회 성능을 보장하기 위한 방법은 무엇일까?
 
-### 고민 1.
+<br>
+
+### 고민 1. 외부 LLM API 지연으로 인한 응답 지연 문제 -> [**전체 글 보기**](https://github.com/jungyu333/SHIORI-BE/wiki/%EC%99%B8%EB%B6%80-LLM-%EC%A7%80%EC%97%B0-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0%EC%9D%84-%EC%9C%84%ED%95%9C-%EB%B9%84%EB%8F%99%EA%B8%B0-%EB%A9%94%EC%8B%9C%EC%A7%)
+
+<br>
+
+#### 문제 인식  
+외부 LLM API 호출이 포함된 요약 기능에서 **평균 10초 이상의 응답 지연**이 발생  
+
+사용자는 요청이 멈춘 것처럼 느꼈고, 여러 사용자가 동시에 요청할 경우 **응답 시간이 20초 이상**으로 늘어나는 문제가 발생함  
+
+<br>
+
+#### 해결 방법  
+**비동기 메시지 큐(Celery + Redis)** 기반 구조로 전환하여 요약 요청과 LLM 호출을 완전히 분리  
+
+- FastAPI는 요청을 받자마자 Celery Task로 등록 후 즉시 응답
 
 
-### 고민 2. 일지 저장 시 동시성 제어
+- Celery Worker가 비동기로 LLM 요약 및 감정 분석을 수행  
+
+
+- 결과는 내부 API를 통해 DB에 저장  
+
+<img src="https://private-user-images.githubusercontent.com/96876293/503218396-5852bfb4-bf4c-469e-bcb9-c514f423b78e.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjA5NjY5MDgsIm5iZiI6MTc2MDk2NjYwOCwicGF0aCI6Ii85Njg3NjI5My81MDMyMTgzOTYtNTg1MmJmYjQtYmY0Yy00NjllLWJjYjktYzUxNGY0MjNiNzhlLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMjAlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDIwVDEzMjMyOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTAyNDQ0ZTM3YTJlY2MwZjYyZTUzMDc1ODU4ZTZjNWUzNGU4Mjk4OGVmYzRiYzc5Njk5M2ZiNTI5ZjVkMDg0NTYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.MPZN4V6Ll0Rel8jcm7hk6TenaYop-1Ia9EfxvnSQjJ4" width="80%" alt="asynchronous architecture diagram" />
+
+결과적으로 **응답 속도를 약 1초 수준으로 단축**하고 외부 LLM 지연이 서버 응답에 영향을 주지 않는 구조로 개선됨  
+
+
+### 고민 2. 일지 저장 시 동시성 제어 -> [**전체 글 보기**](https://github.com/jungyu333/SHIORI-BE/wiki/%EB%8F%99%EC%9D%BC-%EB%82%A0%EC%A7%9C-%EC%9D%BC%EC%A7%80-%EC%A0%80%EC%9E%A5-%EC%8B%9C-%EB%8F%99%EC%8B%9C%EC%84%B1-%EC%A0%9C%EC%96%B4-%ED%95%98%EA%B8%B0)
+
+<br>
 
 #### 문제 인식  
 여러 기기에서 동일 날짜의 일기를 동시에 저장할 경우 **일부 요청만 성공하고 나머지는 반영되지 않는 불안정한 결과**가 발생
 
 <img src="https://github.com/user-attachments/assets/1400a4af-258d-4968-b61d-3eed99b5a18c" width="100%" alt="update conflict diagram" />
 
+<br>
+
 
 #### 문제 원인  
-MongoDB는 문서 단위로 락을 잡기 때문에 **동일 문서에 대한 동시 update 시 락 경합(lock contention)** 이 발생  
+MongoDB는 문서 단위로 락을 잡기 때문에 **동일 문서에 대한 동시 update 시 락 경합(lock contention)** 이 발생
+
 락을 획득하지 못한 요청은 대기 상태에서 **타임아웃 후 실패(500)** 하며 결과적으로 **일부 요청만 성공**하는 불안정한 상황이 발생
+
+<br>
+
 
 #### 해결 방법  
 **낙관적 락(Optimistic Concurrency Control)** 을 적용  
 - `version` 기반 **CAS(compare-and-swap)** 로 단 하나의 요청만 성공 보장  
+
+
 - 나머지 요청은 `409 Conflict`로 명시적 실패 처리
 <br/>
 
 결과적으로 **데이터 정합성을 보장하면서도 충돌 상황을 명시적으로 제어**할 수 있게 됨
-
-[**전체 글 보기**](https://github.com/jungyu333/SHIORI-BE/wiki/%EB%8F%99%EC%9D%BC-%EB%82%A0%EC%A7%9C-%EC%9D%BC%EC%A7%80-%EC%A0%80%EC%9E%A5-%EC%8B%9C-%EB%8F%99%EC%8B%9C%EC%84%B1-%EC%A0%9C%EC%96%B4-%ED%95%98%EA%B8%B0)
