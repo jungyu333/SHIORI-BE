@@ -25,7 +25,7 @@
 
 <br>
 
-### 고민 1. 외부 LLM API 지연으로 인한 응답 지연 문제 -> [**전체 글 보기**](https://github.com/jungyu333/SHIORI-BE/wiki/%EC%99%B8%EB%B6%80-LLM-%EC%A7%80%EC%97%B0-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0%EC%9D%84-%EC%9C%84%ED%95%9C-%EB%B9%84%EB%8F%99%EA%B8%B0-%EB%A9%94%EC%8B%9C%EC%A7%)
+### 고민 1. 외부 LLM API 지연으로 인한 응답 지연 문제 -> [**전체 글 보기**](https://github.com/jungyu333/SHIORI-BE/wiki/%EC%9A%94%EC%95%BD-%EA%B8%B0%EB%8A%A5%EC%9D%98-%EB%B9%84%EB%8F%99%EA%B8%B0-%EB%A9%94%EC%8B%9C%EC%A7%80-%ED%81%90-%EA%B5%AC%EC%A1%B0-%EC%A0%84%ED%99%98)
 
 #### 문제 인식  
 외부 LLM API 호출이 포함된 요약 기능에서 **평균 10초 이상의 응답 지연**이 발생  
