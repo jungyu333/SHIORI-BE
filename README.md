@@ -45,7 +45,7 @@
 
 - 결과는 내부 API를 통해 DB에 저장  
 
-<img src="https://private-user-images.githubusercontent.com/96876293/503218396-5852bfb4-bf4c-469e-bcb9-c514f423b78e.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjA5NjY5MDgsIm5iZiI6MTc2MDk2NjYwOCwicGF0aCI6Ii85Njg3NjI5My81MDMyMTgzOTYtNTg1MmJmYjQtYmY0Yy00NjllLWJjYjktYzUxNGY0MjNiNzhlLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMjAlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDIwVDEzMjMyOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTAyNDQ0ZTM3YTJlY2MwZjYyZTUzMDc1ODU4ZTZjNWUzNGU4Mjk4OGVmYzRiYzc5Njk5M2ZiNTI5ZjVkMDg0NTYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.MPZN4V6Ll0Rel8jcm7hk6TenaYop-1Ia9EfxvnSQjJ4" width="80%" alt="asynchronous architecture diagram" />
+<img width="100%" alt="celery drawio" src="https://github.com/user-attachments/assets/a7a7a5c6-1821-4678-8c8f-6e3ed7ddad59" />
 
 결과적으로 **응답 속도를 약 1초 수준으로 단축**하고 외부 LLM 지연이 서버 응답에 영향을 주지 않는 구조로 개선됨  
 
